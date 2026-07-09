@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Participant Registration | Parallax{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="registration-shell" data-page="{% block page_name %}registration{% endblock %}">
+  <div class="ambient-layer" aria-hidden="true">
+    <span class="ambient-orb ambient-orb--one"></span>
+    <span class="ambient-orb ambient-orb--two"></span>
+    <span class="ambient-orb ambient-orb--three"></span>
+    <span class="ambient-grid"></span>
+  </div>
+
+  <div class="site-shell">
+    <header class="site-header glass-panel">
+      <a class="brand" href="index.html" aria-label="Go to registration landing page">
+        <span class="brand-mark">P</span>
+        <span class="brand-copy">
+          <strong>Parallax</strong>
+          <small>Participant Registration</small>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="index.html" data-nav="landing">Overview</a>
+        <a href="leader.html" data-nav="leader">Team Lead</a>
+        <a href="member.html" data-nav="member">Join Team</a>
+        <a href="payment.html" data-nav="payment">Payment</a>
+        <a href="review.html" data-nav="review">Review</a>
+      </nav>
+
+      <a class="button button-ghost button-compact" href="proof_upload.html">Upload Proof</a>
+    </header>
+
+    <main class="site-main">
+      <section class="hero-grid">
+        <div class="hero-copy" data-reveal>
+          <p class="eyebrow">{% block eyebrow %}National Hackathon 2026{% endblock %}</p>
+          <h1>{% block hero_title %}Participant Registration{% endblock %}</h1>
+          <p class="hero-text">{% block hero_text %}Build your team, complete the flow, and keep every step polished for the official event launch.{% endblock %}</p>
+          <div class="hero-actions">
+            {% block hero_actions %}{% endblock %}
+          </div>
+        </div>
+
+        <aside class="hero-aside glass-panel" data-reveal>
+          {% block hero_aside %}
+          <div class="stack-sm">
+            <span class="aside-label">Registration Flow</span>
+            <h2 class="aside-title">Designed for a smooth handoff</h2>
+            <p class="muted-copy">Each step uses the same UI language, front-end validation, and localStorage simulation for teammate-friendly integration later.</p>
+          </div>
+          {% endblock %}
+        </aside>
+      </section>
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer glass-panel">
+      <div>
+        <p class="footer-title">Parallax National Hackathon</p>
+        <p class="footer-copy">Premium registration flows for leaders, members, and organizer review.</p>
+      </div>
+      <div class="footer-meta">
+        <span>&copy; <span data-current-year></span> Parallax</span>
+        <div class="social-placeholders" aria-label="Social placeholders">
+          <span>IG</span>
+          <span>LN</span>
+          <span>YT</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="{% static 'js/script.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

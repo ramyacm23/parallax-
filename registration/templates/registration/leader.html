@@ -1,0 +1,185 @@
+{% load static %}
+{% extends 'registration/base.html' %}
+
+{% block title %}Team Leader Registration | Parallax{% endblock %}
+{% block page_name %}leader{% endblock %}
+{% block hero_title %}Team Leader Registration{% endblock %}
+{% block hero_text %}Create your team, capture the core details, and generate a team code your members can use to join the registration workflow.{% endblock %}
+{% block hero_actions %}
+<a class="button" href="#leaderRegistrationForm">Start Registration</a>
+<a class="button button-secondary" href="member.html">Need the member form?</a>
+{% endblock %}
+{% block hero_aside %}
+<div class="aside-header">
+  <span class="aside-label">Current Step</span>
+  <span class="status-badge">Pending Approval</span>
+</div>
+<ul class="timeline-list">
+  <li class="timeline-item is-active">
+    <span>01</span>
+    <div>
+      <strong>Register team details</strong>
+      <p>Fill out the leader profile and core team information.</p>
+    </div>
+  </li>
+  <li class="timeline-item">
+    <span>02</span>
+    <div>
+      <strong>Generate team code</strong>
+      <p>The code is stored locally for member validation.</p>
+    </div>
+  </li>
+  <li class="timeline-item">
+    <span>03</span>
+    <div>
+      <strong>Share and continue</strong>
+      <p>Pass the code to teammates and move to payment steps.</p>
+    </div>
+  </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<section class="content-grid content-grid--wide">
+  <div class="glass-panel form-shell" data-reveal>
+    <div class="panel-heading">
+      <span class="section-kicker">Leader Form</span>
+      <h2>Register Team</h2>
+      <p>All fields except the password placeholder are required for this prototype flow.</p>
+    </div>
+
+    <form id="leaderRegistrationForm" class="stack-lg" enctype="multipart/form-data" novalidate>
+      <div class="field-grid">
+        <div class="field">
+          <label for="team-name">Team Name</label>
+          <input class="input" id="team-name" name="team_name" type="text" data-label="Team Name" placeholder="Nebula Builders" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="leader-name">Leader Name</label>
+          <input class="input" id="leader-name" name="leader_name" type="text" data-label="Leader Name" placeholder="Aarav Iyer" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="leader-registration-number">Registration Number</label>
+          <input class="input" id="leader-registration-number" name="registration_number" type="text" data-label="Registration Number" placeholder="23BCE1234" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="college-name">College Name</label>
+          <input class="input" id="college-name" name="college_name" type="text" data-label="College Name" placeholder="VIT Chennai" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="department">Department</label>
+          <input class="input" id="department" name="department" type="text" data-label="Department" placeholder="Computer Science" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="leader-year">Year</label>
+          <select class="input" id="leader-year" name="year" data-label="Year" required>
+            <option value="">Select year</option>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+            <option value="4th Year">4th Year</option>
+            <option value="Postgraduate">Postgraduate</option>
+          </select>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="leader-email">Email</label>
+          <input class="input" id="leader-email" name="email" type="email" data-label="Email" placeholder="leader@college.edu" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="leader-phone">Phone Number</label>
+          <input class="input" id="leader-phone" name="phone" type="tel" data-label="Phone Number" placeholder="9876543210" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="member-count">Number of Team Members</label>
+          <input class="input" id="member-count" name="member_count" type="number" min="1" max="10" data-label="Number of Team Members" placeholder="4" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="leader-password">Password Placeholder</label>
+          <input class="input" id="leader-password" name="password" type="password" data-label="Password" placeholder="Optional for later backend integration">
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field field--full">
+          <label for="leader-proof">Upload Payment Proof</label>
+          <input class="input" id="leader-proof" name="payment_proof" type="file" data-label="Payment Proof" accept=".jpg,.jpeg,.png,.pdf" required>
+          <p class="field-help">Accepted formats: JPG, JPEG, PNG, PDF. Max size 5 MB.</p>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field field--full">
+          <label class="checkbox-row" for="leader-terms">
+            <input id="leader-terms" name="terms" type="checkbox" data-label="Terms and Conditions" required>
+            <span>I accept the terms and conditions for participating in the hackathon.</span>
+          </label>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="form-alert" id="leaderFormAlert" aria-live="polite"></div>
+
+      <button class="button button-large" type="submit">Register Team</button>
+    </form>
+  </div>
+
+  <div class="stack-lg" data-reveal>
+    <section class="glass-panel detail-card">
+      <div class="panel-heading">
+        <span class="section-kicker">Registration Notes</span>
+        <h2>What happens after submit</h2>
+      </div>
+      <ul class="detail-list">
+        <li>A random team code is generated in the format TEAM4831.</li>
+        <li>The leader data is saved in localStorage to simulate backend storage.</li>
+        <li>Team members can use the stored code on the member registration page.</li>
+      </ul>
+    </section>
+
+    <section class="glass-panel status-card is-hidden" id="leaderSuccess" data-success-panel>
+      <div class="panel-heading">
+        <span class="status-badge status-badge--success">Registration Successful</span>
+        <h2>Your team is ready</h2>
+      </div>
+
+      <div class="stats-grid">
+        <article class="metric-card">
+          <span class="metric-label">Team Code</span>
+          <strong id="leaderTeamCode">TEAM0000</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Team Name</span>
+          <strong id="leaderTeamName">Team Name</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Status</span>
+          <strong id="leaderStatus">Pending Approval</strong>
+        </article>
+      </div>
+
+      <p class="status-copy">Share this Team Code with your teammates so they can join your team registration flow.</p>
+
+      <div class="action-row">
+        <a class="button button-secondary" href="member.html">Open Member Page</a>
+        <a class="button" href="payment.html">Go to Payment Page</a>
+      </div>
+    </section>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% load static %}
+{% extends 'registration/base.html' %}
+
+{% block title %}Team Member Registration | Parallax{% endblock %}
+{% block page_name %}member{% endblock %}
+{% block hero_title %}Team Member Registration{% endblock %}
+{% block hero_text %}Join an existing team with the shared team code, confirm your information, and stay synced with the leader's saved registration state.{% endblock %}
+{% block hero_actions %}
+<a class="button" href="#memberRegistrationForm">Join Team</a>
+<a class="button button-secondary" href="leader.html">Create a new team</a>
+{% endblock %}
+{% block hero_aside %}
+<div class="aside-header">
+  <span class="aside-label">Validation</span>
+  <span class="status-badge">Team Code Match</span>
+</div>
+<div class="stack-sm">
+  <p class="muted-copy">The latest team code saved in this browser will be checked when a member submits the form.</p>
+  <div class="info-pill">
+    <span>Latest local code</span>
+    <strong data-team-code-preview>No team registered yet</strong>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="content-grid content-grid--wide">
+  <div class="glass-panel form-shell" data-reveal>
+    <div class="panel-heading">
+      <span class="section-kicker">Member Form</span>
+      <h2>Join Team</h2>
+      <p>Enter the shared team code exactly as provided by the leader and upload your payment proof to complete the demo flow.</p>
+    </div>
+
+    <form id="memberRegistrationForm" class="stack-lg" enctype="multipart/form-data" novalidate>
+      <div class="field-grid">
+        <div class="field field--full">
+          <label for="team-code">Team Code</label>
+          <input class="input" id="team-code" name="team_code" type="text" maxlength="8" data-label="Team Code" placeholder="TEAM4831" required>
+          <p class="field-help">The code is checked against the locally stored leader registration.</p>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="member-name">Name</label>
+          <input class="input" id="member-name" name="member_name" type="text" data-label="Name" placeholder="Diya Menon" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="member-registration-number">Registration Number</label>
+          <input class="input" id="member-registration-number" name="registration_number" type="text" data-label="Registration Number" placeholder="23BCE5678" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="member-college-name">College Name</label>
+          <input class="input" id="member-college-name" name="college_name" type="text" data-label="College Name" placeholder="VIT Chennai" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="member-department">Department</label>
+          <input class="input" id="member-department" name="department" type="text" data-label="Department" placeholder="Computer Science" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="member-year">Year</label>
+          <select class="input" id="member-year" name="year" data-label="Year" required>
+            <option value="">Select year</option>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+            <option value="4th Year">4th Year</option>
+            <option value="Postgraduate">Postgraduate</option>
+          </select>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="member-email">Email</label>
+          <input class="input" id="member-email" name="email" type="email" data-label="Email" placeholder="member@college.edu" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="member-phone">Phone Number</label>
+          <input class="input" id="member-phone" name="phone" type="tel" data-label="Phone Number" placeholder="9876543210" required>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field field--full">
+          <label for="member-proof">Upload Payment Proof</label>
+          <input class="input" id="member-proof" name="payment_proof" type="file" data-label="Payment Proof" accept=".jpg,.jpeg,.png,.pdf" required>
+          <p class="field-help">Accepted formats: JPG, JPEG, PNG, PDF. Max size 5 MB.</p>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="form-alert" id="memberFormAlert" aria-live="polite"></div>
+
+      <button class="button button-large" type="submit">Join Team</button>
+    </form>
+  </div>
+
+  <div class="stack-lg" data-reveal>
+    <section class="glass-panel detail-card">
+      <div class="panel-heading">
+        <span class="section-kicker">Member Guidance</span>
+        <h2>How the match works</h2>
+      </div>
+      <ul class="detail-list">
+        <li>The team code is normalized to uppercase before validation.</li>
+        <li>If the code matches the saved leader entry, the team details appear instantly.</li>
+        <li>If the code does not match, the page shows a clear invalid team code alert.</li>
+      </ul>
+    </section>
+
+    <section class="glass-panel status-card is-hidden" id="memberSuccess" data-success-panel>
+      <div class="panel-heading">
+        <span class="status-badge status-badge--success">Joined Successfully</span>
+        <h2>You are now linked to the team</h2>
+      </div>
+
+      <div class="stats-grid">
+        <article class="metric-card">
+          <span class="metric-label">Team Name</span>
+          <strong id="memberTeamName">Team Name</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Leader Name</span>
+          <strong id="memberLeaderName">Leader Name</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Status</span>
+          <strong id="memberStatus">Pending Approval</strong>
+        </article>
+      </div>
+
+      <p class="status-copy">Your member registration has been stored locally and marked as pending organizer approval.</p>
+
+      <div class="action-row">
+        <a class="button button-secondary" href="payment.html">Open Payment Page</a>
+        <a class="button" href="proof_upload.html">Upload More Proof</a>
+      </div>
+    </section>
+  </div>
+</section>
+{% endblock %}

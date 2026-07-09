@@ -1,0 +1,98 @@
+{% load static %}
+{% extends 'registration/base.html' %}
+
+{% block title %}Event Feedback | Parallax{% endblock %}
+{% block page_name %}review{% endblock %}
+{% block hero_title %}Event Feedback{% endblock %}
+{% block hero_text %}Capture the final impression of the registration and payment experience with a clean five-star feedback flow and structured comments.{% endblock %}
+{% block hero_actions %}
+<a class="button" href="#reviewForm">Submit Feedback</a>
+<a class="button button-secondary" href="index.html">Back to Overview</a>
+{% endblock %}
+{% block hero_aside %}
+<div class="aside-header">
+  <span class="aside-label">Feedback Goal</span>
+  <span class="status-badge">5 Star Rating</span>
+</div>
+<div class="stack-sm">
+  <p class="muted-copy">Use this page to capture sentiment after the registration flow. The submitted review is saved locally for demo purposes.</p>
+  <div class="info-pill">
+    <span>Current Team</span>
+    <strong data-team-name-display>Waiting for leader registration</strong>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="content-grid content-grid--wide">
+  <div class="glass-panel form-shell" data-reveal>
+    <div class="panel-heading">
+      <span class="section-kicker">Review Form</span>
+      <h2>Tell us how the flow felt</h2>
+      <p>Rate the experience, add a thoughtful title and comment, and suggest any improvements you would want organizers to consider.</p>
+    </div>
+
+    <form id="reviewForm" class="stack-lg" novalidate>
+      <div class="field field--full">
+        <label for="overall-rating">Overall Rating</label>
+        <input id="overall-rating" name="overall_rating" type="hidden" data-label="Overall Rating" required>
+        <div class="rating-field">
+          <div class="star-rating" role="radiogroup" aria-label="Choose a rating">
+            <button class="star-button" type="button" data-rating-value="1" aria-label="Rate 1 star">&#9733;</button>
+            <button class="star-button" type="button" data-rating-value="2" aria-label="Rate 2 stars">&#9733;</button>
+            <button class="star-button" type="button" data-rating-value="3" aria-label="Rate 3 stars">&#9733;</button>
+            <button class="star-button" type="button" data-rating-value="4" aria-label="Rate 4 stars">&#9733;</button>
+            <button class="star-button" type="button" data-rating-value="5" aria-label="Rate 5 stars">&#9733;</button>
+          </div>
+          <p class="field-help" id="ratingHelp">Select a rating from one to five stars.</p>
+        </div>
+        <p class="field-error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label for="review-title">Review Title</label>
+        <input class="input" id="review-title" name="review_title" type="text" data-label="Review Title" placeholder="Smooth and polished registration flow" required>
+        <p class="field-error" aria-live="polite"></p>
+      </div>
+
+      <div class="field field--full">
+        <label for="review-comment">Comment</label>
+        <textarea class="input textarea" id="review-comment" name="comment" data-label="Comment" placeholder="Share what worked especially well during registration, payment, and proof upload." required></textarea>
+        <p class="field-error" aria-live="polite"></p>
+      </div>
+
+      <div class="field field--full">
+        <label for="review-suggestions">Suggestions</label>
+        <textarea class="input textarea" id="review-suggestions" name="suggestions" data-label="Suggestions" placeholder="Suggest improvements for organizers or future versions of the module."></textarea>
+        <p class="field-error" aria-live="polite"></p>
+      </div>
+
+      <div class="form-alert" id="reviewFormAlert" aria-live="polite"></div>
+
+      <button class="button button-large" type="submit">Submit Feedback</button>
+    </form>
+  </div>
+
+  <div class="stack-lg" data-reveal>
+    <section class="glass-panel detail-card">
+      <div class="panel-heading">
+        <span class="section-kicker">Feedback Focus</span>
+        <h2>What to review</h2>
+      </div>
+      <ul class="detail-list">
+        <li>Was the registration flow clear for both leaders and members?</li>
+        <li>Did the payment and proof steps feel easy to understand?</li>
+        <li>What improvements would help before backend integration?</li>
+      </ul>
+    </section>
+
+    <section class="glass-panel status-card is-hidden" id="reviewSuccess" data-success-panel>
+      <div class="panel-heading">
+        <span class="status-badge status-badge--success">Review Submitted</span>
+        <h2>Thank you for your feedback.</h2>
+      </div>
+      <p class="status-copy">Your review has been stored locally and can be used later as a handoff reference for backend integration and design refinement.</p>
+    </section>
+  </div>
+</section>
+{% endblock %}
