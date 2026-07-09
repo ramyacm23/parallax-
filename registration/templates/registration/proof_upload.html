@@ -1,0 +1,92 @@
+{% load static %}
+{% extends 'registration/base.html' %}
+
+{% block title %}Payment Proof Upload | Parallax{% endblock %}
+{% block page_name %}proof{% endblock %}
+{% block hero_title %}Payment Proof Upload{% endblock %}
+{% block hero_text %}Drop your file into the upload area, keep it within the supported formats and size limit, and mark the registration as ready for organizer approval.{% endblock %}
+{% block hero_actions %}
+<a class="button" href="#proofUploadForm">Upload Proof</a>
+<a class="button button-secondary" href="review.html">Leave Feedback</a>
+{% endblock %}
+{% block hero_aside %}
+<div class="aside-header">
+  <span class="aside-label">Accepted Files</span>
+  <span class="status-badge">Max 5 MB</span>
+</div>
+<ul class="detail-list detail-list--tight">
+  <li>JPG and JPEG screenshots</li>
+  <li>PNG receipts and confirmation images</li>
+  <li>PDF payment acknowledgements</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<section class="content-grid content-grid--wide">
+  <div class="glass-panel form-shell" data-reveal>
+    <div class="panel-heading">
+      <span class="section-kicker">Upload Card</span>
+      <h2>Upload payment proof</h2>
+      <p>Use drag and drop or the browse button below. Files are validated on the front end and saved locally as demo metadata only.</p>
+    </div>
+
+    <form id="proofUploadForm" class="stack-lg" novalidate>
+      <label class="dropzone" for="proof-file" data-dropzone>
+        <input id="proof-file" name="proof_file" type="file" accept=".jpg,.jpeg,.png,.pdf" data-label="Payment Proof File" required hidden>
+        <span class="dropzone-icon">+</span>
+        <span class="dropzone-title">Drag and drop your file here</span>
+        <span class="dropzone-copy">or click to browse supported formats</span>
+        <span class="dropzone-meta" data-file-meta>No file chosen yet</span>
+      </label>
+
+      <div class="form-alert" id="proofFormAlert" aria-live="polite"></div>
+
+      <div class="action-row">
+        <button class="button button-secondary" type="button" data-file-trigger>Select File</button>
+        <button class="button button-large" type="submit">Upload Payment Proof</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="stack-lg" data-reveal>
+    <section class="glass-panel detail-card">
+      <div class="panel-heading">
+        <span class="section-kicker">Linked Registration</span>
+        <h2>Current local team details</h2>
+      </div>
+      <div class="summary-list">
+        <div class="summary-row">
+          <span>Team Code</span>
+          <strong data-team-code-display>No team code yet</strong>
+        </div>
+        <div class="summary-row">
+          <span>Team Name</span>
+          <strong data-team-name-display>Waiting for leader registration</strong>
+        </div>
+        <div class="summary-row">
+          <span>Approval Status</span>
+          <strong data-team-status-display>Pending registration</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass-panel status-card is-hidden" id="proofSuccess" data-success-panel>
+      <div class="panel-heading">
+        <span class="status-badge status-badge--success">Payment Proof Uploaded Successfully</span>
+        <h2>Waiting for Organizer Approval</h2>
+      </div>
+      <div class="stats-grid">
+        <article class="metric-card">
+          <span class="metric-label">File Name</span>
+          <strong id="proofFileName">payment-proof.pdf</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">File Size</span>
+          <strong id="proofFileSize">0 KB</strong>
+        </article>
+      </div>
+      <p class="status-copy">Your proof metadata is stored locally for this front-end prototype.</p>
+    </section>
+  </div>
+</section>
+{% endblock %}
