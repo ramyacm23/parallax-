@@ -1,5 +1,4 @@
-{% load static %}
-{% extends 'registration/base.html' %}
+{% extends 'parallax/registration/base.html' %}
 
 {% block title %}Event Feedback | Parallax{% endblock %}
 {% block page_name %}review{% endblock %}
@@ -7,7 +6,7 @@
 {% block hero_text %}Capture the final impression of the registration and payment experience with a clean five-star feedback flow and structured comments.{% endblock %}
 {% block hero_actions %}
 <a class="button" href="#reviewForm">Submit Feedback</a>
-<a class="button button-secondary" href="index.html">Back to Overview</a>
+<a class="button button-secondary" href="{% url 'registration_index' %}">Back to Overview</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
@@ -23,7 +22,7 @@
 </div>
 {% endblock %}
 
-{% block content %}
+{% block registration_content %}
 <section class="content-grid content-grid--wide">
   <div class="glass-panel form-shell" data-reveal>
     <div class="panel-heading">

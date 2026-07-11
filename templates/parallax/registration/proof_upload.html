@@ -1,5 +1,4 @@
-{% load static %}
-{% extends 'registration/base.html' %}
+{% extends 'parallax/registration/base.html' %}
 
 {% block title %}Payment Proof Upload | Parallax{% endblock %}
 {% block page_name %}proof{% endblock %}
@@ -7,7 +6,7 @@
 {% block hero_text %}Drop your file into the upload area, keep it within the supported formats and size limit, and mark the registration as ready for organizer approval.{% endblock %}
 {% block hero_actions %}
 <a class="button" href="#proofUploadForm">Upload Proof</a>
-<a class="button button-secondary" href="review.html">Leave Feedback</a>
+<a class="button button-secondary" href="{% url 'registration_review' %}">Leave Feedback</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
@@ -21,7 +20,7 @@
 </ul>
 {% endblock %}
 
-{% block content %}
+{% block registration_content %}
 <section class="content-grid content-grid--wide">
   <div class="glass-panel form-shell" data-reveal>
     <div class="panel-heading">

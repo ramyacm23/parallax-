@@ -1,5 +1,4 @@
-{% load static %}
-{% extends 'registration/base.html' %}
+{% extends 'parallax/registration/base.html' %}
 
 {% block title %}Team Member Registration | Parallax{% endblock %}
 {% block page_name %}member{% endblock %}
@@ -7,7 +6,7 @@
 {% block hero_text %}Join an existing team with the shared team code, confirm your information, and stay synced with the leader's saved registration state.{% endblock %}
 {% block hero_actions %}
 <a class="button" href="#memberRegistrationForm">Join Team</a>
-<a class="button button-secondary" href="leader.html">Create a new team</a>
+<a class="button button-secondary" href="{% url 'registration_leader' %}">Create a new team</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
@@ -23,7 +22,7 @@
 </div>
 {% endblock %}
 
-{% block content %}
+{% block registration_content %}
 <section class="content-grid content-grid--wide">
   <div class="glass-panel form-shell" data-reveal>
     <div class="panel-heading">
@@ -141,8 +140,8 @@
       <p class="status-copy">Your member registration has been stored locally and marked as pending organizer approval.</p>
 
       <div class="action-row">
-        <a class="button button-secondary" href="payment.html">Open Payment Page</a>
-        <a class="button" href="proof_upload.html">Upload More Proof</a>
+        <a class="button button-secondary" href="{% url 'registration_payment' %}">Open Payment Page</a>
+        <a class="button" href="{% url 'registration_proof' %}">Upload More Proof</a>
       </div>
     </section>
   </div>

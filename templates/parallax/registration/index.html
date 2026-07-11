@@ -1,13 +1,12 @@
-{% load static %}
-{% extends 'registration/base.html' %}
+{% extends 'parallax/registration/base.html' %}
 
 {% block title %}Participant Registration | Parallax{% endblock %}
 {% block page_name %}landing{% endblock %}
 {% block hero_title %}Participant Registration{% endblock %}
 {% block hero_text %}Choose your registration type and move through a clear, premium onboarding flow built for fast team formation and smooth event coordination.{% endblock %}
 {% block hero_actions %}
-<a class="button" href="leader.html">Create Team</a>
-<a class="button button-secondary" href="member.html">Join Team</a>
+<a class="button" href="{% url 'registration_leader' %}">Create Team</a>
+<a class="button button-secondary" href="{% url 'registration_member' %}">Join Team</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
@@ -39,7 +38,7 @@
 </ul>
 {% endblock %}
 
-{% block content %}
+{% block registration_content %}
 <section class="content-grid content-grid--two">
   <article class="feature-card glass-panel" data-reveal>
     <span class="section-kicker">Team Leader</span>
@@ -50,7 +49,7 @@
       <li>Collect participant and payment details</li>
       <li>Share the code with teammates instantly</li>
     </ul>
-    <a class="button" href="leader.html">Create Team</a>
+    <a class="button" href="{% url 'registration_leader' %}">Create Team</a>
   </article>
 
   <article class="feature-card glass-panel" data-reveal>
@@ -62,7 +61,7 @@
       <li>Capture member information securely</li>
       <li>Stay ready for later backend hookup</li>
     </ul>
-    <a class="button button-secondary" href="member.html">Join Team</a>
+    <a class="button button-secondary" href="{% url 'registration_member' %}">Join Team</a>
   </article>
 </section>
 

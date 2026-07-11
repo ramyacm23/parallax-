@@ -1,5 +1,4 @@
-{% load static %}
-{% extends 'registration/base.html' %}
+{% extends 'parallax/registration/base.html' %}
 
 {% block title %}Team Leader Registration | Parallax{% endblock %}
 {% block page_name %}leader{% endblock %}
@@ -7,7 +6,7 @@
 {% block hero_text %}Create your team, capture the core details, and generate a team code your members can use to join the registration workflow.{% endblock %}
 {% block hero_actions %}
 <a class="button" href="#leaderRegistrationForm">Start Registration</a>
-<a class="button button-secondary" href="member.html">Need the member form?</a>
+<a class="button button-secondary" href="{% url 'registration_member' %}">Need the member form?</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
@@ -39,7 +38,7 @@
 </ul>
 {% endblock %}
 
-{% block content %}
+{% block registration_content %}
 <section class="content-grid content-grid--wide">
   <div class="glass-panel form-shell" data-reveal>
     <div class="panel-heading">
@@ -176,8 +175,8 @@
       <p class="status-copy">Share this Team Code with your teammates so they can join your team registration flow.</p>
 
       <div class="action-row">
-        <a class="button button-secondary" href="member.html">Open Member Page</a>
-        <a class="button" href="payment.html">Go to Payment Page</a>
+        <a class="button button-secondary" href="{% url 'registration_member' %}">Open Member Page</a>
+        <a class="button" href="{% url 'registration_payment' %}">Go to Payment Page</a>
       </div>
     </section>
   </div>

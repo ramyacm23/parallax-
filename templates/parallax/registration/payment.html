@@ -1,5 +1,4 @@
-{% load static %}
-{% extends 'registration/base.html' %}
+{% extends 'parallax/registration/base.html' %}
 
 {% block title %}Payment Page | Parallax{% endblock %}
 {% block page_name %}payment{% endblock %}
@@ -7,7 +6,7 @@
 {% block hero_text %}Registration is complete on the front end. Use the placeholder event hub link now, then move to proof upload for organizer review readiness.{% endblock %}
 {% block hero_actions %}
 <a class="button" href="https://example.com" target="_blank" rel="noreferrer noopener">Proceed to Event Hub</a>
-<a class="button button-secondary" href="proof_upload.html">Upload Proof</a>
+<a class="button button-secondary" href="{% url 'registration_proof' %}">Upload Proof</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
@@ -23,7 +22,7 @@
 </div>
 {% endblock %}
 
-{% block content %}
+{% block registration_content %}
 <section class="content-grid content-grid--two">
   <article class="glass-panel detail-card" data-reveal>
     <div class="panel-heading">
@@ -34,7 +33,7 @@
 
     <div class="action-row">
       <a class="button button-large" href="https://example.com" target="_blank" rel="noreferrer noopener">Proceed to Event Hub</a>
-      <a class="button button-secondary" href="proof_upload.html">Go to Proof Upload</a>
+      <a class="button button-secondary" href="{% url 'registration_proof' %}">Go to Proof Upload</a>
     </div>
 
     <div class="info-banner">

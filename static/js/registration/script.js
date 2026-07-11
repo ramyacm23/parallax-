@@ -32,7 +32,7 @@ function setCurrentYear() {
 function highlightActiveNavigation() {
   const page = document.body.dataset.page;
   const navKey = page === "proof" ? "payment" : page;
-  const activeLink = document.querySelector(`.site-nav [data-nav="${navKey}"]`);
+  const activeLink = document.querySelector(`[data-nav="${navKey}"]`);
 
   if (activeLink) {
     activeLink.classList.add("is-active");
@@ -72,7 +72,7 @@ function enableButtonRipples() {
     return;
   }
 
-  document.querySelectorAll(".button").forEach((button) => {
+  document.querySelectorAll(".button, .parallax-btn").forEach((button) => {
     button.addEventListener("click", (event) => {
       const rect = button.getBoundingClientRect();
       const ripple = document.createElement("span");

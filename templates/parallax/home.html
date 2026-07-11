@@ -27,7 +27,7 @@
     </p>
 
     <div class="hero-cta">
-      <a href="#home-cta" class="btn-cta">Register Now &nbsp;<i class="fa-solid fa-arrow-right"></i></a>
+      <a href="{% url 'registration_index' %}" class="btn-cta">Register Now &nbsp;<i class="fa-solid fa-arrow-right"></i></a>
       <a href="{% url 'about' %}" class="btn-out">Learn More</a>
     </div>
 
@@ -58,7 +58,7 @@
   <div class="hero-right">
     <div class="hero-logo-panel" id="geoWrap">
       <!-- VIT Chennai Logo -->
-      <img src="{% static 'img/vit-logo.png' %}"
+      <img src="{% static 'assets/vit-logo.png' %}"
            alt="VIT Chennai"
            class="hlp-vit-logo">
 
@@ -70,7 +70,7 @@
       <div class="hlp-presents">presents</div>
 
       <!-- Parallax Logo -->
-      <img src="{% static 'img/parallax-logo.png' %}"
+      <img src="{% static 'assets/parallax-logo.png' %}"
            alt="PARALLAX"
            class="hlp-parallax-logo">
     </div>
@@ -205,7 +205,7 @@
       Bring your sharpest idea and your best collaborators.
     </p>
     <div class="cta-btns reveal d2">
-      <a href="#" class="btn-cta">Register Free &nbsp;<i class="fa-solid fa-arrow-right"></i></a>
+      <a href="{% url 'registration_index' %}" class="btn-cta">Register Free &nbsp;<i class="fa-solid fa-arrow-right"></i></a>
       <a href="{% url 'about' %}" class="btn-out">Read Our Story</a>
     </div>
   </div>
