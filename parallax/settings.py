@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     'parallax',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -31,8 +32,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'parallax.urls'
@@ -40,7 +43,7 @@ ROOT_URLCONF = 'parallax.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'parallax' / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'],  # ADD THIS LINE
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
