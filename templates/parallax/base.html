@@ -4,36 +4,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="{% block meta %}PARALLAX 2026 — See Beyond. Build Beyond. VIT Chennai's 48-hour cross-discipline hackathon.{% endblock %}">
-  <title>{% block title %}PARALLAX 2026 — VIT Chennai{% endblock %}</title>
+  <meta name="description" content="{% block meta %}PARALLAX 2026 | See Beyond. Build Beyond. VIT Chennai's 48-hour cross-discipline hackathon.{% endblock %}">
+  <title>{% block title %}PARALLAX 2026 | VIT Chennai{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/parallax.css' %}">
   {% block extra_css %}{% endblock %}
+  {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}" data-page="{% block body_data_page %}{% endblock %}">
 
-<!-- PROGRESS BAR -->
 <div id="progress-bar"></div>
-<!-- CURSOR GLOW -->
 <div id="cursor-glow"></div>
 
-<!-- ═══════════════════════════════════════
-     NAV — 3 zones: logos | links | register
-═══════════════════════════════════════ -->
 <nav id="nav">
-
-  <!-- LEFT: Logos -->
   <div class="nav-left">
     <a href="{% url 'home' %}" class="nav-logo-link">
-      <img src="{% static 'img/parallax-logo.png' %}" alt="Parallax" class="nav-logo-parallax">
+      <img src="{% static 'assets/parallax-logo.png' %}" alt="Parallax" class="nav-logo-parallax">
     </a>
     <div class="nav-logo-sep"></div>
-    <img src="{% static 'img/vit-logo.png' %}" alt="VIT Chennai" class="nav-logo-vit">
+    <img src="{% static 'assets/vit-logo.png' %}" alt="VIT Chennai" class="nav-logo-vit">
   </div>
 
-  <!-- CENTER: Nav links -->
   <div class="nav-center">
     <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
     <a href="{% url 'home' %}#tracks" class="nav-link">Tracks</a>
@@ -44,26 +37,19 @@
     <a href="{% url 'about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
   </div>
 
-  <!-- RIGHT: Register CTA -->
   <div class="nav-right">
-    <a href="{% url 'home' %}#home-cta" class="nav-register-btn">Register <i class="fa-solid fa-arrow-right"></i></a>
+    <a href="{% url 'registration_index' %}" class="nav-register-btn">Register <i class="fa-solid fa-arrow-right"></i></a>
   </div>
-
 </nav>
 
 {% block content %}{% endblock %}
 
-<!-- ═══════════════════════════════════════
-     FOOTER — 4 columns + bottom bar
-═══════════════════════════════════════ -->
 <footer>
   <div class="footer-grid">
-
-    <!-- COL 1: Brand + Social -->
     <div class="footer-brand-col">
-      <img src="{% static 'img/parallax-logo.png' %}" alt="Parallax" class="footer-logo-img">
+      <img src="{% static 'assets/parallax-logo.png' %}" alt="Parallax" class="footer-logo-img">
       <p class="footer-tagline">
-        Parallax is VIT Chennai's premier cross-discipline hackathon — 48 hours to shift your perspective, 
+        Parallax is VIT Chennai's premier cross-discipline hackathon | 48 hours to shift your perspective,
         collide with brilliant minds, and build solutions that matter. Organised by SENSE.
       </p>
       <div class="footer-social-row">
@@ -82,7 +68,6 @@
       </div>
     </div>
 
-    <!-- COL 2: Event -->
     <div class="footer-col">
       <h4 class="footer-col-title">Event</h4>
       <ul class="footer-links">
@@ -90,16 +75,11 @@
         <li><a href="{% url 'home' %}#tracks"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Tracks</a></li>
         <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Prizes</a></li>
         <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Guidelines</a></li>
-        <li>
-          <a href="https://wa.me/">
-            <i class="fa-solid fa-chevron-right footer-li-icon"></i>Team Finding
-          </a>
-        </li>
+        <li><a href="https://wa.me/"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Team Finding</a></li>
         <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Schedule</a></li>
       </ul>
     </div>
 
-    <!-- COL 3: Navigate (big, 2-column grid) -->
     <div class="footer-col footer-nav-col">
       <h4 class="footer-col-title footer-nav-title">Navigate</h4>
       <ul class="footer-nav-grid">
@@ -109,12 +89,11 @@
         <li><a href="#">Prizes</a></li>
         <li><a href="#">Schedule</a></li>
         <li><a href="#">Guidelines</a></li>
-        <li><a href="#">Guidelines</a></li>
-        <li><a href="#">Register</a></li>
+        <li><a href="{% url 'registration_index' %}">Registration</a></li>
+        <li><a href="{% url 'team_login' %}">Team Login</a></li>
       </ul>
     </div>
 
-    <!-- COL 4: Team -->
     <div class="footer-col">
       <h4 class="footer-col-title">Team</h4>
       <ul class="footer-links">
@@ -124,10 +103,8 @@
         <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Contact</a></li>
       </ul>
     </div>
+  </div>
 
-  </div><!-- /footer-grid -->
-
-  <!-- BOTTOM BAR -->
   <div class="footer-bottom-bar">
     <span class="footer-copy">&copy; 2026 Parallax &middot; VIT Chennai</span>
     <div class="footer-legal">
@@ -138,7 +115,6 @@
       <a href="#">Cookie Policy</a>
     </div>
   </div>
-
 </footer>
 
 <script src="{% static 'js/main.js' %}"></script>

@@ -1,0 +1,54 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}Participant Registration | Parallax{% endblock %}
+{% block body_class %}registration-shell{% endblock %}
+{% block body_data_page %}{% block page_name %}registration{% endblock %}{% endblock %}
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/registration/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ambient-layer" aria-hidden="true">
+  <span class="ambient-orb ambient-orb--one"></span>
+  <span class="ambient-orb ambient-orb--two"></span>
+  <span class="ambient-orb ambient-orb--three"></span>
+  <span class="ambient-grid"></span>
+</div>
+
+<section class="block registration-block">
+  <div class="wrap registration-wrap">
+    <main class="site-main">
+      <section class="hero-grid">
+        <div class="hero-copy glass-panel" data-reveal>
+          <p class="eyebrow">{% block eyebrow %}National Hackathon 2026{% endblock %}</p>
+          <h1>{% block hero_title %}Participant Registration{% endblock %}</h1>
+          <p class="hero-text">{% block hero_text %}Build your team, complete the flow, and keep every step polished for the official event launch.{% endblock %}</p>
+          <div class="hero-actions">
+            {% block hero_actions %}{% endblock %}
+          </div>
+        </div>
+
+        <aside class="hero-aside glass-panel" data-reveal>
+          {% block hero_aside %}
+          <div class="stack-sm">
+            <span class="aside-label">Registration Flow</span>
+            <h2 class="aside-title">Designed for a smooth handoff</h2>
+            <p class="muted-copy">Each step uses the same UI language, front-end validation, and localStorage simulation for teammate-friendly integration later.</p>
+          </div>
+          {% endblock %}
+        </aside>
+      </section>
+
+      {% block registration_content %}{% endblock %}
+    </main>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/registration/script.js' %}"></script>
+{% endblock %}

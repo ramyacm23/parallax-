@@ -1,0 +1,88 @@
+{% extends 'parallax/registration/base.html' %}
+
+{% block title %}Payment Page | Parallax{% endblock %}
+{% block page_name %}payment{% endblock %}
+{% block hero_title %}Payment Page{% endblock %}
+{% block hero_text %}Registration is complete on the front end. Use the placeholder event hub link now, then move to proof upload for organizer review readiness.{% endblock %}
+{% block hero_actions %}
+<a class="button" href="https://example.com" target="_blank" rel="noreferrer noopener">Proceed to Event Hub</a>
+<a class="button button-secondary" href="{% url 'registration_proof' %}">Upload Proof</a>
+{% endblock %}
+{% block hero_aside %}
+<div class="aside-header">
+  <span class="aside-label">Registration Completed</span>
+  <span class="status-badge status-badge--success">Ready for Payment</span>
+</div>
+<div class="stack-sm">
+  <p class="muted-copy">The event hub URL is intentionally isolated to make replacement easy when the final link is available.</p>
+  <div class="info-pill">
+    <span>Current Event Hub</span>
+    <strong>https://example.com</strong>
+  </div>
+</div>
+{% endblock %}
+
+{% block registration_content %}
+<section class="content-grid content-grid--two">
+  <article class="glass-panel detail-card" data-reveal>
+    <div class="panel-heading">
+      <span class="section-kicker">Next Action</span>
+      <h2>Complete payment before uploading proof</h2>
+      <p>Use the large CTA below to access the placeholder event hub. Another teammate can replace the link later without touching the rest of the page layout.</p>
+    </div>
+
+    <div class="action-row">
+      <a class="button button-large" href="https://example.com" target="_blank" rel="noreferrer noopener">Proceed to Event Hub</a>
+      <a class="button button-secondary" href="{% url 'registration_proof' %}">Go to Proof Upload</a>
+    </div>
+
+    <div class="info-banner">
+      <strong>Reminder:</strong>
+      <span>Complete payment before uploading proof for organizer approval.</span>
+    </div>
+  </article>
+
+  <aside class="glass-panel detail-card" data-reveal>
+    <div class="panel-heading">
+      <span class="section-kicker">Saved Registration</span>
+      <h2>Local registration snapshot</h2>
+    </div>
+    <div class="summary-list">
+      <div class="summary-row">
+        <span>Team Code</span>
+        <strong data-team-code-display>No team code yet</strong>
+      </div>
+      <div class="summary-row">
+        <span>Team Name</span>
+        <strong data-team-name-display>Waiting for leader registration</strong>
+      </div>
+      <div class="summary-row">
+        <span>Leader Name</span>
+        <strong data-leader-name-display>Waiting for leader registration</strong>
+      </div>
+      <div class="summary-row">
+        <span>Status</span>
+        <strong data-team-status-display>Pending registration</strong>
+      </div>
+    </div>
+  </aside>
+</section>
+
+<section class="stack-grid" data-reveal>
+  <article class="mini-card glass-panel">
+    <span class="section-kicker">Step A</span>
+    <h3>Visit the event hub</h3>
+    <p>Use the placeholder link for now. It is the only external URL on this page and can be swapped later in seconds.</p>
+  </article>
+  <article class="mini-card glass-panel">
+    <span class="section-kicker">Step B</span>
+    <h3>Upload your proof</h3>
+    <p>Move to the upload page after payment so the organizer-facing workflow can continue with a clear approval signal.</p>
+  </article>
+  <article class="mini-card glass-panel">
+    <span class="section-kicker">Step C</span>
+    <h3>Leave feedback</h3>
+    <p>Once the flow is complete, the review page captures event experience details and stores them locally for the demo.</p>
+  </article>
+</section>
+{% endblock %}
