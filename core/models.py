@@ -4,10 +4,7 @@ import string
 from django.conf import settings
 from django.db import models
 
-
 class Participant(models.Model):
-    # OAuth creates this record with email + name only.
-    # Profile completion (phone, college, reg_number) is mandatory before team creation.
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='participant')
     full_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
@@ -17,18 +14,19 @@ class Participant(models.Model):
     is_profile_complete = models.BooleanField(default=False)  # Toggled after mandatory profile form submission
     team = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
     is_team_leader = models.BooleanField(default=False)
+    payment_proof = models.FileField(upload_to='payment-proofs/', blank=True, null=True)
+    approval_status = models.CharField(max_length=10, choices=[('PENDING','Pending'),('APPROVED','Approved'),('REJECTED','Rejected')], default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"
 
-
 class Track(models.Model):
-    # Problem statement track; publish/unpublish controlled via admin.
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
     problem_statements = models.TextField()  # Stores the five problems + requirements as structured text or JSON
     is_published = models.BooleanField(default=False)  # Admin controls this; frontend shows only if True
+    is_problem_live = models.BooleanField(default=False, help_text='Make this track’s problem statements visible to participants.')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -56,6 +54,7 @@ class Team(models.Model):
     ]
 
     team_name = models.CharField(max_length=100, unique=True)
+    team_code = models.CharField(max_length=10, unique=True, blank=True)
     leader = models.ForeignKey(
         Participant, on_delete=models.CASCADE, related_name='led_team', null=True, blank=True
     )
@@ -67,6 +66,15 @@ class Team(models.Model):
 
     def __str__(self):
         return self.team_name
+
+    def save(self, *args, **kwargs):
+        if not self.team_code:
+            while True:
+                code = 'PX-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+                if not Team.objects.filter(team_code=code).exists():
+                    self.team_code = code
+                    break
+        super().save(*args, **kwargs)
 
     @property
     def member_count(self):

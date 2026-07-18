@@ -1,37 +1,27 @@
 {% extends "parallax/base.html" %}
 {% load static %}
 
-
 {% block title %}Home — PARALLAX 2026 · VIT Chennai{% endblock %}
 
 {% block content %}
 
-<!-- ═══════════════════════════════════════
-     HERO
-═══════════════════════════════════════ -->
-<section id="home-hero">
+<section id="home-hero" class="px-hero">
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
-
-  <!-- LEFT: Copy -->
-  <div class="hero-content">
-    <h1 class="hero-title">
-      See Beyond.<br>
-      <span class="glow">Build Beyond.</span>
-    </h1>
-
-    <p class="hero-sub">
-      <strong>48 hours.</strong> Real problems. Disciplines collide.
-      Parallax is the hackathon for builders who believe the best solutions emerge
-      when engineering, design, research, and vision share the same mission.
-    </p>
-
-    <div class="hero-cta">
-      <a href="{% url 'registration_index' %}" class="btn-cta">Register Now &nbsp;<i class="fa-solid fa-arrow-right"></i></a>
-      <a href="{% url 'about' %}" class="btn-out">Learn More</a>
+  <div class="px-hero-inner">
+    <div class="px-mark-wrap">
+      <img src="{% static 'assets/parallax logo.png' %}" alt="Parallax emblem">
     </div>
+    <p class="px-sub">
+      Parallax is the hackathon for builders who believe the best solutions
+      emerge when engineering, design, research, and vision share the same mission.
+    </p>
+    <div class="px-presented">Presented by</div>
+    <div class="px-org">School of Electronics Engineering</div>
 
-    <div class="hero-timer" id="heroTimer">
+    <a href="{% url 'registration_index' %}" class="btn-cta">Register Now &nbsp;<i class="fa-solid fa-arrow-right"></i></a>
+
+    <div class="px-timer" id="heroTimer">
       <div class="timer-block">
         <div class="timer-num" id="td-days">00</div>
         <div class="timer-label">Days</div>
@@ -53,161 +43,51 @@
       </div>
     </div>
   </div>
-
-  <!-- RIGHT: Logos panel -->
-  <div class="hero-right">
-    <div class="hero-logo-panel" id="geoWrap">
-      <!-- VIT Chennai Logo -->
-      <img src="{% static 'assets/vit-logo.png' %}"
-           alt="VIT Chennai"
-           class="hlp-vit-logo">
-
-      <!-- Divider -->
-      <div class="hlp-divider"></div>
-
-      <!-- Presents text -->
-      <div class="hlp-org">SCHOOL OF ELECTRONICS ENGINEERING</div>
-      <div class="hlp-presents">presents</div>
-
-      <!-- Parallax Logo -->
-      <img src="{% static 'assets/parallax-logo.png' %}"
-           alt="PARALLAX"
-           class="hlp-parallax-logo">
-    </div>
-  </div>
 </section>
 
-<!-- ═══════════════════════════════════════
-     STATS TICKER
-═══════════════════════════════════════ -->
-<div class="stats-bar">
-  <div class="ticker-track">
-    {% for stat in stats %}
-    <div class="ticker-item">
-      <span class="ticker-num">{{ stat.number }}</span>
-      <span class="ticker-label">{{ stat.label }}</span>
-    </div>
-    {% endfor %}
-    {% for stat in stats %}
-    <div class="ticker-item">
-      <span class="ticker-num">{{ stat.number }}</span>
-      <span class="ticker-label">{{ stat.label }}</span>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     TRACKS
-═══════════════════════════════════════ -->
 <section id="tracks" class="section">
   <div class="wrap">
     <div class="tracks-header reveal">
-      <div class="eyebrow">Challenge Tracks</div>
-      <h2 class="sec-title">Six arenas for innovation</h2>
+      <h2 class="sec-title">Five arenas for innovation</h2>
       <p class="sec-sub">Each track unites builders across disciplines. Dedicated mentors, sponsor challenges, and prize pools await.</p>
     </div>
     <div class="tracks-grid">
       {% for track in tracks %}
-      <div class="track-card reveal d{{ forloop.counter|add:'0'|slice:':1' }}">
-        <span class="track-idx">Track {{ track.index }}</span>
-        <span class="track-icon">{{ track.icon }}</span>
+      <div class="track-card reveal">
+        <span class="track-icon"><i class="fa-solid {{ track.icon }}"></i></span>
         <h3 class="track-name">{{ track.name }}</h3>
         <p class="track-desc">{{ track.description }}</p>
-        <div class="track-footer">
-          <div>
-            <div class="track-prize">{{ track.prize }}</div>
-            <div class="track-prize-label">Prize</div>
-          </div>
-          <span class="track-tag">{{ track.tag }}</span>
-        </div>
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════
-     WHY PARALLAX
-═══════════════════════════════════════ -->
-<section id="why" class="section">
+</section>
+<section id="sponsors" class="section">
   <div class="wrap">
-    <div class="why-grid">
-      <div class="reveal">
-        <div class="eyebrow">Why Parallax</div>
-        <div class="why-cards">
-          <div class="why-card">
-            <div class="why-icon">🔭</div>
-            <div>
-              <div class="why-title">Cross-discipline by design</div>
-              <div class="why-desc">Teams are scored on how well disciplines intersect. A biologist with a systems hacker beats a solo engineer every time.</div>
-            </div>
-          </div>
-          <div class="why-card">
-            <div class="why-icon">🧠</div>
-            <div>
-              <div class="why-title">120+ expert mentors</div>
-              <div class="why-desc">Office hours run 24/7. Our mentors are practitioners — they look at your code, not your slides.</div>
-            </div>
-          </div>
-          <div class="why-card">
-            <div class="why-icon">🌍</div>
-            <div>
-              <div class="why-title">Global participation</div>
-              <div class="why-desc">30+ hubs across 6 continents. Every timezone has builders working on the same challenges simultaneously.</div>
-            </div>
-          </div>
-          <div class="why-card">
-            <div class="why-icon">🚀</div>
-            <div>
-              <div class="why-title">What comes after</div>
-              <div class="why-desc">15 past winners raised funding. 3 are Y Combinator companies. 48 hours is just the beginning.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="reveal d2">
-        <div class="eyebrow">The Parallax Effect</div>
-        <h2 class="why-feat-title">
-          Same problem.<br>
-          <span class="why-grad">Different angle.</span><br>
-          Better answer.
-        </h2>
-        <p class="why-feat-body">
-          In optics, parallax is the apparent shift in an object's position when viewed from different vantage points.
-          When a machine learning engineer and a clinical researcher look at the same dataset, they don't see the same problem —
-          and that difference is exactly where breakthroughs happen.
-        </p>
-        <div class="chips">
-          <span class="chip">Healthcare</span><span class="chip">AI / ML</span>
-          <span class="chip">Open Source</span><span class="chip">Climate</span>
-          <span class="chip">Education</span><span class="chip">Deep Tech</span>
-          <span class="chip">Robotics</span><span class="chip">Web3</span>
-        </div>
-      </div>
+    <div class="tracks-header reveal">
+      <h2 class="sec-title">Powered by our partners</h2>
+    </div>
+    <div class="sponsor-grid">
+      {% for i in "123" %}
+      <article class="sponsor-card">
+        <div class="sponsor-logo-placeholder"><i class="fa-solid fa-building"></i></div>
+        <h3>Sponsor Name</h3>
+        <p>Two-line description of the sponsor and what they bring to Parallax 2026.</p>
+      </article>
+      {% endfor %}
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════
-     HOME CTA
-═══════════════════════════════════════ -->
-<section id="home-cta">
-  <div class="cta-grid"></div>
-  <div class="cta-inner">
-    <div class="eyebrow" style="justify-content:center">Applications Close Aug 31</div>
-    <h2 class="cta-title reveal">
-      Ready to <span class="cg">shift perspectives?</span>
-    </h2>
-    <p class="cta-sub reveal d1">
-      48 hours. Real problems. 5,000 builders from every discipline.
-      Bring your sharpest idea and your best collaborators.
-    </p>
-    <div class="cta-btns reveal d2">
-      <a href="{% url 'registration_index' %}" class="btn-cta">Register Free &nbsp;<i class="fa-solid fa-arrow-right"></i></a>
-      <a href="{% url 'about' %}" class="btn-out">Read Our Story</a>
+<section id="about-teaser" class="section">
+  <div class="wrap about-short-inner">
+    <div class="tracks-header reveal">
+      <h2 class="sec-title">Parallax, in short</h2>
+      <p class="sec-sub">48 hours by VIT Chennai's School of Electronics Engineering — meet the team behind it.</p>
     </div>
+    <a href="{% url 'about' %}" class="btn-out">Meet the team</a>
   </div>
 </section>
 

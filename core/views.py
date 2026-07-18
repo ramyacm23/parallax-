@@ -1,7 +1,22 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 
+from core.emailing import approval_confirmation, registration_confirmation
 from core.models import Announcement, Marks, Participant, Review, Team, Track
+
+TRACKS = [
+    ('Aviation & Space Tech', 'Build intelligent systems for aerospace, autonomous flight and satellite technologies.', 'fa-rocket'),
+    ('Embedded Systems', 'Create real-time hardware-software systems for devices, automation and edge computing.', 'fa-microchip'),
+    ('Healthcare & Assistive Tech', 'Design technologies that improve access, rehabilitation and quality of life.', 'fa-heart-pulse'),
+    ('Sustainable Smart Infrastructure', 'Engineer resilient cities through smart energy, mobility and monitoring.', 'fa-leaf'),
+    ('Communication & Cyber Physical Systems', 'Develop secure networks and intelligent connected infrastructure.', 'fa-satellite-dish'),
+]
+
+def public_tracks():
+    saved = list(Track.objects.filter(is_published=True))
+    return saved or [{'name': n, 'description': d, 'icon': i, 'is_problem_live': False} for n, d, i in TRACKS]
 
 
 def home(request):
@@ -9,23 +24,38 @@ def home(request):
     reviews = Review.objects.all().order_by('scheduled_at')
     context = {
         'announcements': announcements,
-        'reviews': reviews,
+        'reviews': reviews, 'tracks': public_tracks(),
     }
     return render(request, 'parallax/home.html', context)
 
 
 def about(request):
-    return render(request, 'parallax/about.html')
+    return render(request, 'parallax/about.html', {'values': [
+        {'letter':'01','title':'Curiosity over certainty','description':'Ask the questions that move a problem forward.'},
+        {'letter':'02','title':'Build with intent','description':'Make useful ideas tangible, testable and humane.'},
+        {'letter':'03','title':'Different views, stronger work','description':'The best solutions are rarely built from one perspective.'},
+        {'letter':'04','title':'Leave a trace','description':'Create work that matters after the final demo ends.'},
+    ], 'team': []})
 
 
 def tracks(request):
-    published_tracks = Track.objects.filter(is_published=True)
+    published_tracks = public_tracks()
     context = {'tracks': published_tracks}
     return render(request, 'parallax/tracks.html', context)
 
 
 def faq(request):
     return render(request, 'parallax/faq.html')
+
+def information(request, page):
+    pages = {
+        'schedule': ('Review Schedule', 'Every checkpoint is designed to turn momentum into measurable progress.'),
+        'prizes': ('Prizes & Recognition', 'The prize pool and sponsor awards will be announced here.'),
+        'guidelines': ('Guidelines', 'Build boldly. Work fairly. Leave every space better than you found it.'),
+        'theme': ('Theme', 'Same problem. Different view. Better answer.'),
+        'contact': ('Contact the OC', 'Have a question? The organising committee is here to help.'),
+    }
+    return render(request, 'parallax/information.html', {'page': page, 'heading': pages[page][0], 'tagline': pages[page][1], 'reviews': Review.objects.all().order_by('scheduled_at'), 'tracks': public_tracks()})
 
 
 def team_login(request):
@@ -123,6 +153,8 @@ def register_team(request):
             participant.team = team
             participant.is_team_leader = True
             participant.save()
+            registration_confirmation(team)
+            messages.success(request, f'Team created. Your team code is {team.team_code}. A confirmation email has been sent.')
             return redirect('participant_dashboard')
 
     published_tracks = Track.objects.filter(is_published=True)
@@ -180,6 +212,7 @@ def admin_teams(request):
         team = get_object_or_404(Team, id=team_id)
         if action == 'approve':
             team.status = 'APPROVED'
+            approval_confirmation(team)
         elif action == 'reject':
             team.status = 'REJECTED'
 
@@ -215,3 +248,15 @@ def admin_announcements(request):
     announcements = Announcement.objects.all().order_by('-created_at')
     context = {'announcements': announcements}
     return render(request, 'parallax/admin/announcements.html', context)
+
+@login_required(login_url='team_login')
+def admin_tracks(request):
+    if not request.user.is_staff:
+        return redirect('home')
+    if request.method == 'POST':
+        track = get_object_or_404(Track, id=request.POST.get('track_id'))
+        field = request.POST.get('field')
+        if field in ('is_published', 'is_problem_live'):
+            setattr(track, field, not getattr(track, field))
+            track.save(update_fields=[field, 'updated_at'])
+    return render(request, 'parallax/admin/tracks.html', {'tracks': Track.objects.all().order_by('name')})
