@@ -10,7 +10,7 @@
   <div class="hero-grid"></div>
   <div class="px-hero-inner">
     <div class="px-mark-wrap">
-      <img src="{% static 'assets/parallax logo.png' %}" alt="Parallax emblem">
+      <img src="{% static 'assets/parallax logo.jpeg' %}" alt="Parallax emblem" class="px-mark-icon">
     </div>
     <p class="px-sub">
       Parallax is the hackathon for builders who believe the best solutions
@@ -81,16 +81,32 @@
   </div>
 </section>
 
-<section id="about-teaser" class="section">
-  <div class="wrap about-short-inner">
-    <div class="tracks-header reveal">
-      <h2 class="sec-title">Parallax, in short</h2>
-      <p class="sec-sub">48 hours by VIT Chennai's School of Electronics Engineering — meet the team behind it.</p>
+<section id="about-parallax" class="section">
+  <div class="wrap about-parallax-wrap">
+    <div class="about-summary">
+      <div class="about-mark">
+        <img src="{% static 'assets/parallax logo.png' %}" alt="Parallax">
+      </div>
+      <div>
+        <h2>ABOUT PARALLAX</h2>
+        <p>Parallax is a hybrid week long innovation challenge where students, developers, designers, and thinkers come together to build meaningful solutions across diverse domains. It is a platform to learn, collaborate, and create impact that goes beyond the hackathon.</p>
+      </div>
     </div>
-    <a href="{% url 'about' %}" class="btn-out">Meet the team</a>
+
+    <h2 class="oc-heading">WHAT TO EXPECT</h2>
+    <div class="expect-grid">
+      <article class="expect-card"><i class="fa-solid fa-rocket"></i><h3>Innovation</h3><p>Push boundaries and build something new.</p></article>
+      <article class="expect-card"><i class="fa-solid fa-handshake"></i><h3>Collaboration</h3><p>Work with amazing people and mentors.</p></article>
+      <article class="expect-card"><i class="fa-solid fa-graduation-cap"></i><h3>Learning</h3><p>Gain skills and real-world exposure.</p></article>
+      <article class="expect-card"><i class="fa-solid fa-wand-magic-sparkles"></i><h3>Fun & Experience</h3><p>Make unforgettable memories.</p></article>
+    </div>
+
+    <div class="about-closer">
+      <strong>SAME PROBLEM.<br><span>DIFFERENT VIEW.</span><br>BETTER ANSWER.</strong>
+      <p>Parallax is where ideas shift perspectives and perspectives create impact.<br><a href="{% url 'registration_index' %}">SEE YOU AT PARALLAX 2026!</a></p>
+    </div>
   </div>
 </section>
-
 {% endblock %}
 
 {% block extra_js %}
