@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/parallax.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/mobile.css' %}">
   {% block extra_css %}{% endblock %}
   {% block extra_head %}{% endblock %}
 </head>
@@ -20,20 +22,14 @@
 
 <nav id="nav">
   <div class="nav-left">
-    <a href="{% url 'home' %}" class="nav-logo-link">
-      <img src="{% static 'assets/parallax-logo.png' %}" alt="Parallax" class="nav-logo-parallax">
-    </a>
-    <div class="nav-logo-sep"></div>
     <img src="{% static 'assets/vit-logo.png' %}" alt="VIT Chennai" class="nav-logo-vit">
   </div>
 
   <div class="nav-center">
     <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
-    <a href="{% url 'home' %}#tracks" class="nav-link">Tracks</a>
-    <a href="#" class="nav-link nav-placeholder">Schedule</a>
-    <a href="#" class="nav-link nav-placeholder">Prizes</a>
-    <a href="#" class="nav-link nav-placeholder">Guidelines</a>
-    <a href="#" class="nav-link nav-placeholder">Team</a>
+    <a href="{% url 'tracks' %}" class="nav-link {% if request.resolver_match.url_name == 'tracks' %}active{% endif %}">Tracks</a>
+    <a href="{% url 'information' 'prizes' %}" class="nav-link">Prizes</a>
+    <a href="{% url 'information' 'guidelines' %}" class="nav-link">Guidelines</a>
     <a href="{% url 'about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
   </div>
 
@@ -44,6 +40,8 @@
 
 {% block content %}{% endblock %}
 
+{% if messages %}<div class="site-messages">{% for message in messages %}<div>{{ message }}</div>{% endfor %}</div>{% endif %}
+
 <footer>
   <div class="footer-grid">
     <div class="footer-brand-col">
@@ -53,18 +51,10 @@
         collide with brilliant minds, and build solutions that matter. Organised by SENSE.
       </p>
       <div class="footer-social-row">
-        <a href="#" class="footer-social-btn" title="Instagram">
-          <i class="fab fa-instagram"></i>
-        </a>
-        <a href="https://wa.me/" class="footer-social-btn" title="WhatsApp">
-          <i class="fab fa-whatsapp"></i>
-        </a>
-        <a href="#" class="footer-social-btn" title="LinkedIn">
-          <i class="fab fa-linkedin-in"></i>
-        </a>
-        <a href="#" class="footer-social-btn" title="Twitter / X">
-          <i class="fa-brands fa-x-twitter"></i>
-        </a>
+        <a href="#" class="footer-social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/" class="footer-social-btn" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="footer-social-btn" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="footer-social-btn" title="Twitter / X"><i class="fa-brands fa-x-twitter"></i></a>
       </div>
     </div>
 
@@ -73,10 +63,10 @@
       <ul class="footer-links">
         <li><a href="{% url 'about' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Parallax</a></li>
         <li><a href="{% url 'home' %}#tracks"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Tracks</a></li>
-        <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Prizes</a></li>
-        <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Guidelines</a></li>
+        <li><a href="{% url 'information' 'prizes' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Prizes</a></li>
+        <li><a href="{% url 'information' 'guidelines' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Guidelines</a></li>
         <li><a href="https://wa.me/"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Team Finding</a></li>
-        <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Schedule</a></li>
+        <li><a href="{% url 'information' 'schedule' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Schedule</a></li>
       </ul>
     </div>
 
@@ -85,10 +75,10 @@
       <ul class="footer-nav-grid">
         <li><a href="{% url 'home' %}">Home</a></li>
         <li><a href="{% url 'about' %}">About</a></li>
-        <li><a href="{% url 'home' %}#tracks">Tracks</a></li>
-        <li><a href="#">Prizes</a></li>
-        <li><a href="#">Schedule</a></li>
-        <li><a href="#">Guidelines</a></li>
+        <li><a href="{% url 'tracks' %}">Tracks</a></li>
+        <li><a href="{% url 'information' 'prizes' %}">Prizes</a></li>
+        <li><a href="{% url 'information' 'schedule' %}">Schedule</a></li>
+        <li><a href="{% url 'information' 'guidelines' %}">Guidelines</a></li>
         <li><a href="{% url 'registration_index' %}">Registration</a></li>
         <li><a href="{% url 'team_login' %}">Team Login</a></li>
       </ul>
@@ -100,7 +90,7 @@
         <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Core Team</a></li>
         <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Sponsors</a></li>
         <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Judges</a></li>
-        <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Contact</a></li>
+        <li><a href="{% url 'information' 'contact' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Contact</a></li>
       </ul>
     </div>
   </div>

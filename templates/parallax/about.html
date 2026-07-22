@@ -1,118 +1,22 @@
-{% extends "parallax/base.html" %}
-{% load static %}
-{% block title %}About — PARALLAX 2026 · VIT Chennai{% endblock %}
-{% block meta %}The story behind Parallax, our mission, values, and the team building VIT Chennai's flagship hackathon.{% endblock %}
-
+{% extends 'parallax/base.html' %}{% load static %}
+{% block title %}About Us | Parallax 2026{% endblock %}
 {% block content %}
-
-<section id="about-hero">
-  <div class="about-inner">
-    <div class="about-badge">Parallax · SENSE · VIT Chennai · Founded 2022</div>
-    <h1 class="about-title">
-      <span class="muted-line">See Beyond</span><br>
-      <span class="grad-line">Perspectives</span>
-    </h1>
-    <p class="about-sub">
-      We started with one uncomfortable question: why do hackathons produce so many incremental ideas?
-      The answer had everything to do with who was in the room.
-    </p>
-  </div>
-</section>
-
-<section id="mission">
-  <div class="mission-inner">
-    <div class="mission-divider"></div>
-    <p class="mission-quote reveal">
-      "The most important breakthroughs don't come from deeper expertise in a single domain — they come from
-      <span class="accent">collisions between disciplines</span>
-      that had never been in the same room before."
-    </p>
-    <div class="mission-attr reveal d1">Parallax Founding Principle &middot; 2022</div>
-  </div>
-</section>
-
-<section id="story" class="section">
-  <div class="wrap">
-    <div class="story-grid">
-      <div class="reveal">
-        <div class="eyebrow">Our Story</div>
-        <h2 class="story-title">Built because the best hackathon we wanted didn't exist.</h2>
-        <div class="story-body">
-          <p>The founders of Parallax had all attended hackathons — the good ones and the forgettable ones. The pattern was consistent: put engineers in a room, give them 48 hours, and watch them optimize around the edges of known problems. <strong>Nothing wrong with that.</strong> But it wasn't enough.</p>
-          <p>In 2022, a group of builders across machine learning, clinical research, architecture, and product design ran a small experiment: 72 hours, no tracks, mixed teams only. <strong>The results were strange and interesting.</strong> One team built a triage system using camera hardware repurposed from industrial quality control. Another borrowed a data compression approach from acoustic modeling.</p>
-          <p>Parallax was the formalization of that experiment — organized by SENSE at VIT Chennai, it has grown from 200 participants to a global event in just three years.</p>
-        </div>
-      </div>
-      <div class="story-stats reveal d2">
-        <div class="stat-card">
-          <div class="stat-card-num">3</div>
-          <div><div class="stat-card-title">Years Running</div><div class="stat-card-desc">Parallax has run annually since 2022, growing from 200 to 5,000 builders globally.</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-num">15</div>
-          <div><div class="stat-card-title">Funded Startups</div><div class="stat-card-desc">Projects that began as Parallax submissions, now backed by VCs and in production.</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-num">30+</div>
-          <div><div class="stat-card-title">Global Hubs</div><div class="stat-card-desc">Physical venues across 6 continents where participants hack in-person, connected globally.</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-num">72%</div>
-          <div><div class="stat-card-title">Cross-discipline Teams</div><div class="stat-card-desc">Share of winning teams whose members held degrees in fundamentally different fields.</div></div>
-        </div>
-      </div>
+<main class="about-reference">
+  <p class="eyebrow">About Parallax 2026</p><h1>ABOUT <span>US</span></h1>
+  <p class="about-copy">Parallax is the annual flagship hackathon of VIT Chennai, brought to you by the School of Electronics Engineering. We bring together curious minds, diverse skills, and bold ideas to solve real-world problems from new perspectives.</p>
+  <section class="oc-panel">
+    <h2 class="oc-heading">FACULTY COORDINATORS</h2><div class="faculty-grid">
+      <article class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Faculty Coordinator</h3><p>Assistant Professor<br>School of Electronics Engineering</p></article>
+      <article class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Faculty Coordinator</h3><p>Assistant Professor<br>School of Electronics Engineering</p></article>
     </div>
-  </div>
-</section>
-
-<section id="values" class="section">
-  <div class="wrap">
-    <div class="reveal">
-      <div class="eyebrow">What We Stand For</div>
-      <h2 class="sec-title">Four principles. One direction.</h2>
-      <p class="sec-sub">Everything we build into Parallax — format, judging criteria, team-matching — flows from these.</p>
+    <h2 class="oc-heading">CORE COMMITTEE</h2><div class="core-grid">
+      {% for name, role in core_members %}<article class="core-box"><h3 class="person-card"></h3><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>{{ name }}</h3><p>{{ role }}</p></article>{% empty %}
+      <article class="core-box"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Core Member</h3></article><article class="core-box"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Core Member</h3></article><article class="core-box"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Core Member</h3></article><article class="core-box"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Core Member</h3></article><article class="core-box"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Core Member</h3></article><article class="core-box"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Core Member</h3></article><article class="core-box"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Core Member</h3></article>{% endfor %}
     </div>
-    <div class="values-grid">
-      {% for value in values %}
-      <div class="val-card reveal d{{ forloop.counter }}">
-        <div class="val-letter">{{ value.letter }}</div>
-        <h3 class="val-title">{{ value.title }}</h3>
-        <p class="val-desc">{{ value.description }}</p>
-      </div>
-      {% endfor %}
+    <div class="lead-grid">
+      <article class="lead-box"><h3 class="lead-title">TECHNICAL COMMITTEE LEADS</h3><div class="lead-members"><div class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Lead</h3><p>Technical Lead</p></div><div class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Lead</h3><p>Technical Lead</p></div></div></article>
+      <article class="lead-box"><h3 class="lead-title">OPERATIONS COMMITTEE LEADS</h3><div class="lead-members"><div class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Lead</h3><p>Operations Lead</p></div><div class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Lead</h3><p>Operations Lead</p></div></div></article>
+      <article class="lead-box"><h3 class="lead-title">MEDIA & DESIGN TEAM LEADS</h3><div class="lead-members"><div class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Lead</h3><p>Media Lead</p></div><div class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Lead</h3><p>Design Lead</p></div></div></article>
     </div>
-  </div>
-</section>
-
-<section id="team" class="section">
-  <div class="wrap">
-    <div class="reveal">
-      <div class="eyebrow">The Organizing Team</div>
-      <h2 class="sec-title">Seven builders. One shared obsession.</h2>
-      <p class="sec-sub">We run Parallax alongside day jobs in research, engineering, and design. Nobody gets paid. The hackathon is the product.</p>
-    </div>
-    <div class="team-grid">
-      {% for member in team %}
-      <div class="member-card reveal d{{ forloop.counter }}">
-        <div class="member-avatar">{{ member.avatar_emoji }}</div>
-        <div class="member-name">{{ member.name }}</div>
-        <div class="member-role">{{ member.role }}</div>
-        <div class="member-bio">{{ member.bio }}</div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<section id="about-cta">
-  <div class="about-cta-inner">
-    <h2 class="about-cta-title reveal">Come shift your perspective.</h2>
-    <p class="about-cta-sub reveal d1">Applications for Parallax 2026 are open now. Free to enter. No prerequisites. Just bring curiosity and a tolerance for chaos.</p>
-    <div class="cta-btns reveal d2">
-      <a href="{% url 'registration_index' %}" class="btn-cta">Apply for Parallax &nbsp;<i class="fa-solid fa-arrow-right"></i></a>
-      <a href="{% url 'home' %}#tracks" class="btn-out">Explore Tracks</a>
-    </div>
-  </div>
-</section>
-
-{% endblock %}
+  </section>
+</main>{% endblock %}
