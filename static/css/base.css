@@ -1,16 +1,16 @@
 body{background:radial-gradient(ellipse at 50% -10%, rgba(24,120,255,.28), transparent 60%),radial-gradient(ellipse at 50% 100%, rgba(0,183,255,.10), transparent 50%),#0a1c42;color:#eef7ff;}
-#nav{display:flex !important;visibility:visible !important;opacity:1 !important;align-items:center;justify-content:space-between;padding:18px 56px;position:sticky;top:0;z-index:50;transition:background .3s,backdrop-filter .3s}
+#nav{display:flex !important;visibility:visible !important;opacity:1 !important;align-items:center;justify-content:space-between;padding:18px 30px;position:sticky;top:0;z-index:50;transition:background .3s,backdrop-filter .3s}
 #nav.scrolled{background:rgba(2,8,23,.72);backdrop-filter:blur(14px);box-shadow:0 1px 0 rgba(63,176,255,.15)}
-.nav-logo-vit{height:44px;display:block}
+.nav-logo-vit{height:160px;display:block}
 .nav-center{display:flex;gap:26px}
 .nav-link{position:relative;color:#cfe3ff;font-family:var(--mono);text-transform:uppercase;font-size:.76rem;letter-spacing:.05em;padding:6px 2px;transition:color .25s,text-shadow .25s}
 .nav-link:hover,.nav-link.active{color:#fff;text-shadow:0 0 12px rgba(63,176,255,.9),0 0 22px rgba(63,176,255,.5)}
 .nav-link.active::after{content:'';position:absolute;left:0;bottom:-6px;width:100%;height:2px;background:linear-gradient(90deg,#3fb0ff,#8fd6ff);box-shadow:0 0 8px rgba(63,176,255,.8)}
-.nav-right{display:flex;align-items:center;gap:20px}
+.nav-right{display:flex;align-items:center;gap:18px;}
 .nav-register-btn,.btn-cta{background:linear-gradient(110deg,#0875ff,#00cfee);box-shadow:0 0 22px rgba(0,183,255,.3);color:#fff;padding:11px 22px;border-radius:8px;font-size:.8rem;font-weight:600;letter-spacing:.04em;transition:all .25s;display:inline-flex;align-items:center;gap:6px}
 .nav-register-btn:hover,.btn-cta:hover{box-shadow:0 0 32px rgba(0,183,255,.55);transform:translateY(-1px)}
-.nav-login-btn{color:#3fb0ff;background:transparent;border:1.5px solid rgba(63,176,255,.55);padding:10px 20px;border-radius:8px;font-size:.8rem;font-weight:600;letter-spacing:.04em;transition:all .25s}
-.nav-login-btn:hover{color:#fff;border-color:#3fb0ff;background:rgba(63,176,255,.08);box-shadow:0 0 18px rgba(63,176,255,.55);text-shadow:0 0 8px rgba(63,176,255,.8)}
+.nav-login-btn{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:8px;border:1.5px solid rgba(63,176,255,.55);background:transparent;color:#3fb0ff;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;transition:all .25s;}
+.nav-login-btn:hover{color:#fff;border-color:#3fb0ff;background:rgba(63,176,255,.08);box-shadow:0 0 22px rgba(63,176,255,.55);text-shadow:0 0 10px rgba(63,176,255,.8);transform:translateY(-1px);}
 #home-hero.px-hero{  position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 24px 70px;overflow:hidden;min-height:auto;justify-content:flex-start;background:radial-gradient(ellipse at 50% 30%,rgba(17,81,198,.22),transparent 55%)}
 .px-hero .hero-bg,.px-hero .hero-grid{position:absolute;inset:0;z-index:0}
 .px-hero .px-hero-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;max-width:700px}
@@ -47,7 +47,7 @@ body{background:radial-gradient(ellipse at 50% -10%, rgba(24,120,255,.28), trans
 .oc-heading{font-family:var(--mono);letter-spacing:.26em;font-size:.78rem;color:var(--px-cyan);margin:0 0 22px}
 .faculty-grid,.core-grid,.lead-grid{display:grid;gap:18px}
 .faculty-grid{grid-template-columns:repeat(2,minmax(0,190px));justify-content:center;margin-bottom:42px}
-.core-grid{grid-template-columns:repeat(7,1fr);margin-bottom:38px}
+.core-grid{grid-template-columns:repeat(4,1fr);margin-bottom:38px}
 .lead-grid{grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(22,135,255,.2);padding-top:32px}
 .portrait-placeholder{width:86px;height:86px;margin:0 auto 13px;border-radius:50%;display:grid;place-items:center;border:2px solid #1687ff;background:radial-gradient(circle at 50% 30%,#174d85,#07142e 60%);color:#7ddaff;font-size:1.55rem;box-shadow:0 0 18px rgba(0,184,255,.18)}
 .faculty-grid .person-card{padding:18px;border:1px solid rgba(21,133,255,.45);border-radius:12px;background:rgba(1,12,33,.6)}
@@ -85,3 +85,96 @@ body{background:radial-gradient(ellipse at 50% -10%, rgba(24,120,255,.28), trans
 .track-desc{color:#aebbd0;font-size:.8rem;line-height:1.6}
 .info-grid{display:flex !important;flex-wrap:wrap;justify-content:center;gap:20px;}
 .info-grid .info-card{flex:0 1 300px;}
+footer {
+  background: #0a0e1a;
+  color: #8fa3c4;
+  padding: 60px 60px 24px;
+  font-family: inherit;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.7fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-logo-img {
+  width: 56px;
+  margin-bottom: 12px;
+}
+
+.footer-brand-title {
+  color: #fff;
+  letter-spacing: 4px;
+  font-size: 20px;
+  margin: 0 0 16px;
+}
+
+.footer-tagline {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #6b7fa3;
+  margin: 0 0 24px;
+  max-width: 340px;
+}
+
+.footer-social-row {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-social-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8fa3c4;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.footer-social-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.footer-col-title {
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+}
+
+.footer-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 14px 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.footer-nav-grid li a,
+.footer-links li a {display: flex;align-items:center;gap:6px;color:#8fa3c4;text-decoration:none;font-size:14px;white-space:nowrap;transition:color 0.2s;}
+.footer-nav-grid li a:hover,
+.footer-links li a:hover {color: #fff;}
+.footer-li-icon {font-size: 10px;flex-shrink: 0;}
+.footer-bottom-bar {max-width: 1200px;margin: 48px auto 0;padding-top: 20px;border-top: 1px solid rgba(255,255,255,0.08);display: flex;  justify-content: space-between;  align-items: center;  flex-wrap: wrap;  gap: 12px;  font-size: 12px;  color: #5c6d8c;}
+.footer-legal a {color: #5c6d8c;text-decoration: none;}
+.footer-legal a:hover {color: #fff;}
+.footer-legal-sep {  margin: 0 8px;  color: #3a4560;}
+@media (max-width: 720px) {.footer-grid {grid-template-columns: 1fr;}footer {padding: 40px 24px 20px;}}

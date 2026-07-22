@@ -22,7 +22,7 @@
 
 <nav id="nav">
   <div class="nav-left">
-    <img src="{% static 'assets/vit-logo.png' %}" alt="VIT Chennai" class="nav-logo-vit">
+    <img src="{% static 'assets/VIT WHITE LOGO.png' %}" alt="VIT Chennai" class="nav-logo-vit">
   </div>
 
   <div class="nav-center">
@@ -34,6 +34,9 @@
   </div>
 
   <div class="nav-right">
+    <a href="{% url 'team_login' %}" class="nav-login-btn">
+      TEAM LOGIN <i class="fa-solid fa-arrow-right"></i>
+    </a>
     <a href="{% url 'registration_index' %}" class="nav-register-btn">Register <i class="fa-solid fa-arrow-right"></i></a>
   </div>
 </nav>
@@ -45,9 +48,9 @@
 <footer>
   <div class="footer-grid">
     <div class="footer-brand-col">
-      <img src="{% static 'assets/parallax-logo.png' %}" alt="Parallax" class="footer-logo-img">
+      <h3 class="footer-brand-title">PARALLAX</h3>
       <p class="footer-tagline">
-        Parallax is VIT Chennai's premier cross-discipline hackathon | 48 hours to shift your perspective,
+        Parallax is VIT Chennai's premier cross-discipline hackathon to shift your perspective,
         collide with brilliant minds, and build solutions that matter. Organised by SENSE.
       </p>
       <div class="footer-social-row">
@@ -58,39 +61,23 @@
       </div>
     </div>
 
-    <div class="footer-col">
-      <h4 class="footer-col-title">Event</h4>
-      <ul class="footer-links">
-        <li><a href="{% url 'about' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Parallax</a></li>
-        <li><a href="{% url 'home' %}#tracks"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Tracks</a></li>
-        <li><a href="{% url 'information' 'prizes' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Prizes</a></li>
-        <li><a href="{% url 'information' 'guidelines' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Guidelines</a></li>
-        <li><a href="https://wa.me/"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Team Finding</a></li>
-        <li><a href="{% url 'information' 'schedule' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Schedule</a></li>
-      </ul>
-    </div>
-
     <div class="footer-col footer-nav-col">
       <h4 class="footer-col-title footer-nav-title">Navigate</h4>
       <ul class="footer-nav-grid">
-        <li><a href="{% url 'home' %}">Home</a></li>
-        <li><a href="{% url 'about' %}">About</a></li>
-        <li><a href="{% url 'tracks' %}">Tracks</a></li>
-        <li><a href="{% url 'information' 'prizes' %}">Prizes</a></li>
-        <li><a href="{% url 'information' 'schedule' %}">Schedule</a></li>
-        <li><a href="{% url 'information' 'guidelines' %}">Guidelines</a></li>
-        <li><a href="{% url 'registration_index' %}">Registration</a></li>
-        <li><a href="{% url 'team_login' %}">Team Login</a></li>
+        <li><a href="{% url 'home' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i><span>Home</span></a></li>
+        <li><a href="{% url 'tracks' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i><span>Tracks</span></a></li>
+        <li><a href="{% url 'information' 'prizes' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i><span>Prizes</span></a></li>
+        <li><a href="{% url 'about' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i><span>About</span></a></li>
+        <li><a href="{% url 'registration_index' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i><span>Registration</span></a></li>
+        <li><a href="{% url 'team_login' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i><span>Team Login</span></a></li>
       </ul>
     </div>
 
     <div class="footer-col">
       <h4 class="footer-col-title">Team</h4>
       <ul class="footer-links">
-        <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Core Team</a></li>
-        <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Sponsors</a></li>
-        <li><a href="#"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Judges</a></li>
-        <li><a href="{% url 'information' 'contact' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i>Contact</a></li>
+        <li><a href="{% url 'about' %}"><i class="fa-solid fa-chevron-right footer-li-icon"></i><span>Core Team</span></a></li>
+        <li><a href="{% url 'home' %}#sponsors"><i class="fa-solid fa-chevron-right footer-li-icon"></i><span>Sponsors</span></a></li>
       </ul>
     </div>
   </div>

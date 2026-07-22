@@ -1,85 +1,167 @@
 {% extends 'parallax/registration/base.html' %}
 
-{% block title %}Participant Registration | Parallax{% endblock %}
+{% block title %}Hackathon Registration | Parallax{% endblock %}
 {% block page_name %}landing{% endblock %}
-{% block hero_title %}Participant Registration{% endblock %}
-{% block hero_text %}Choose your registration type and move through a clear, premium onboarding flow built for fast team formation and smooth event coordination.{% endblock %}
-{% block hero_actions %}
-<a class="button" href="{% url 'registration_leader' %}">Create Team</a>
-<a class="button button-secondary" href="{% url 'registration_member' %}">Join Team</a>
+
+{% block hero_title %}
+Hackathon Registration
 {% endblock %}
+
+{% block hero_text %}
+Register your team for Parallax in a few simple steps. Continue with Google for a faster experience or register manually. Complete your payment, wait for organizer verification, and you're ready to participate.
+{% endblock %}
+
+{% block hero_actions %}
+<a class="button" href="#">Continue with Google</a>
+<a class="button button-secondary" href="{% url 'registration_leader' %}">
+    Continue without Google
+</a>
+{% endblock %}
+
 {% block hero_aside %}
 <div class="aside-header">
-  <span class="aside-label">Registration Flow</span>
-  <span class="status-badge status-badge--live">Frontend Prototype</span>
+    <span class="aside-label">Registration Workflow</span>
+    <span class="status-badge status-badge--live">Open</span>
 </div>
+
 <ul class="timeline-list">
-  <li class="timeline-item is-active">
-    <span>01</span>
-    <div>
-      <strong>Create a team</strong>
-      <p>Leaders register the squad and receive a unique team code.</p>
-    </div>
-  </li>
-  <li class="timeline-item">
-    <span>02</span>
-    <div>
-      <strong>Add members</strong>
-      <p>Teammates join with the saved code and stay in pending review.</p>
-    </div>
-  </li>
-  <li class="timeline-item">
-    <span>03</span>
-    <div>
-      <strong>Upload and review</strong>
-      <p>Payment proof and event feedback are handled in the same module.</p>
-    </div>
-  </li>
+    <li class="timeline-item is-active">
+        <span>01</span>
+        <div>
+            <strong>Create your team</strong>
+            <p>Register yourself and create your hackathon team.</p>
+        </div>
+    </li>
+
+    <li class="timeline-item">
+        <span>02</span>
+        <div>
+            <strong>Complete payment</strong>
+            <p>Proceed to the payment page after submitting your details.</p>
+        </div>
+    </li>
+
+    <li class="timeline-item">
+        <span>03</span>
+        <div>
+            <strong>Organizer Verification</strong>
+            <p>Your payment will be reviewed and approved by the organizing team.</p>
+        </div>
+    </li>
+
+    <li class="timeline-item">
+        <span>04</span>
+        <div>
+            <strong>Dashboard Access</strong>
+            <p>Edit team details, manage members, and track your registration status.</p>
+        </div>
+    </li>
 </ul>
 {% endblock %}
 
 {% block registration_content %}
-<section class="content-grid content-grid--two">
-  <article class="feature-card glass-panel" data-reveal>
-    <span class="section-kicker">Team Leader</span>
-    <h2>Create a new team</h2>
-    <p class="card-copy">Start the registration flow, generate the team code, and keep every team detail in one polished place.</p>
-    <ul class="inline-list">
-      <li>Generate a local demo team code</li>
-      <li>Collect participant and payment details</li>
-      <li>Share the code with teammates instantly</li>
-    </ul>
-    <a class="button" href="{% url 'registration_leader' %}">Create Team</a>
-  </article>
 
-  <article class="feature-card glass-panel" data-reveal>
-    <span class="section-kicker">Team Member</span>
-    <h2>Join an existing team</h2>
-    <p class="card-copy">Use the leader's team code to connect to the saved team and confirm your registration status.</p>
-    <ul class="inline-list">
-      <li>Validate team code locally</li>
-      <li>Capture member information securely</li>
-      <li>Stay ready for later backend hookup</li>
-    </ul>
-    <a class="button button-secondary" href="{% url 'registration_member' %}">Join Team</a>
-  </article>
+<section class="content-grid content-grid--two">
+
+    <article class="feature-card glass-panel" data-reveal>
+
+        <span class="section-kicker">
+            Team Registration
+        </span>
+
+        <h2>Start Your Registration</h2>
+
+        <p class="card-copy">
+            Register your team in one place. Team details, participant information,
+            preferred domains, and track selection are collected in a single form.
+        </p>
+
+        <ul class="inline-list">
+            <li>Quick registration</li>
+            <li>Google sign-in supported</li>
+            <li>Edit after organizer approval</li>
+            <li>Secure participant information</li>
+        </ul>
+
+        <a class="button"
+           href="{% url 'registration_leader' %}">
+            Register Team
+        </a>
+
+    </article>
+
+    <article class="feature-card glass-panel" data-reveal>
+
+        <span class="section-kicker">
+            Registration Overview
+        </span>
+
+        <h2>What Happens Next?</h2>
+
+        <p class="card-copy">
+            Once your registration is submitted, you'll complete the payment process.
+            After payment verification by the organizers, you'll receive access to your
+            team dashboard where you can update team information if required.
+        </p>
+
+        <ul class="inline-list">
+            <li>Registration Submission</li>
+            <li>Payment</li>
+            <li>Verification</li>
+            <li>Dashboard Access</li>
+        </ul>
+
+    </article>
+
 </section>
 
 <section class="stack-grid" data-reveal>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step 1</span>
-    <h3>Premium-first experience</h3>
-    <p>Dark glassmorphism surfaces, measured spacing, hover lift, and smooth transitions keep the flow polished from start to finish.</p>
-  </article>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step 2</span>
-    <h3>JavaScript-powered validation</h3>
-    <p>Required fields, phone and email checks, team code verification, and friendly inline errors help avoid broken submissions.</p>
-  </article>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step 3</span>
-    <h3>LocalStorage simulation</h3>
-    <p>Leader data, joined members, proof uploads, and feedback are stored locally so the prototype behaves like a real product.</p>
-  </article>
+
+    <article class="mini-card glass-panel">
+
+        <span class="section-kicker">
+            Domains
+        </span>
+
+        <h3>Choose Your Expertise</h3>
+
+        <p>
+            During registration, your team can select one or more preferred domains:
+            AI, ML, IoT, Communications, Cybersecurity, Healthcare, Aviation, and Space Tech.
+        </p>
+
+    </article>
+
+    <article class="mini-card glass-panel">
+
+        <span class="section-kicker">
+            Payment
+        </span>
+
+        <h3>Simple Verification</h3>
+
+        <p>
+            Complete your payment after registration. The organizing team will verify
+            your payment before activating your team dashboard.
+        </p>
+
+    </article>
+
+    <article class="mini-card glass-panel">
+
+        <span class="section-kicker">
+            Dashboard
+        </span>
+
+        <h3>Manage Your Team</h3>
+
+        <p>
+            After approval, edit team information, manage members, update preferred
+            domains, and monitor your registration status from one dashboard.
+        </p>
+
+    </article>
+
 </section>
+
 {% endblock %}
