@@ -3,7 +3,7 @@
 {% block title %}Team Member Registration | Parallax{% endblock %}
 {% block page_name %}member{% endblock %}
 {% block hero_title %}Team Member Registration{% endblock %}
-{% block hero_text %}Join an existing team with the shared team code, confirm your information, and stay synced with the leader's saved registration state.{% endblock %}
+{% block hero_text %}Start with the shared team code, enter the member details, and stay synced with the team state saved by the leader.{% endblock %}
 {% block hero_actions %}
 <a class="button" href="#memberRegistrationForm">Join Team</a>
 <a class="button button-secondary" href="{% url 'registration_leader' %}">Create a new team</a>
@@ -14,7 +14,7 @@
   <span class="status-badge">Team Code Match</span>
 </div>
 <div class="stack-sm">
-  <p class="muted-copy">The latest team code saved in this browser will be checked when a member submits the form.</p>
+  <p class="muted-copy">The saved leader registration in this browser is checked when a member submits the team code.</p>
   <div class="info-pill">
     <span>Latest local code</span>
     <strong data-team-code-preview>No team registered yet</strong>
@@ -28,7 +28,7 @@
     <div class="panel-heading">
       <span class="section-kicker">Member Form</span>
       <h2>Join Team</h2>
-      <p>Enter the shared team code exactly as provided by the leader and upload your payment proof to complete the demo flow.</p>
+      <p>Enter the team code first. The registration number appears only when the selected college is a VIT campus.</p>
     </div>
 
     <form id="memberRegistrationForm" class="stack-lg" enctype="multipart/form-data" novalidate>
@@ -36,7 +36,7 @@
         <div class="field field--full">
           <label for="team-code">Team Code</label>
           <input class="input" id="team-code" name="team_code" type="text" maxlength="8" data-label="Team Code" placeholder="TEAM4831" required>
-          <p class="field-help">The code is checked against the locally stored leader registration.</p>
+          <p class="field-help">The code is matched against the saved leader registration.</p>
           <p class="field-error" aria-live="polite"></p>
         </div>
 
@@ -47,14 +47,27 @@
         </div>
 
         <div class="field">
-          <label for="member-registration-number">Registration Number</label>
-          <input class="input" id="member-registration-number" name="registration_number" type="text" data-label="Registration Number" placeholder="23BCE5678" required>
+          <label for="member-college">College</label>
+          <select class="input" id="member-college" name="college_name" data-label="College" data-college-control required>
+            <option value="">Select college</option>
+            <option value="VIT Chennai" data-is-vit="true">VIT Chennai</option>
+            <option value="VIT Vellore" data-is-vit="true">VIT Vellore</option>
+            <option value="VIT Bhopal" data-is-vit="true">VIT Bhopal</option>
+            <option value="VIT-AP" data-is-vit="true">VIT-AP</option>
+            <option value="OTHER">Other College</option>
+          </select>
           <p class="field-error" aria-live="polite"></p>
         </div>
 
-        <div class="field">
-          <label for="member-college-name">College Name</label>
-          <input class="input" id="member-college-name" name="college_name" type="text" data-label="College Name" placeholder="VIT Chennai" required>
+        <div class="field is-hidden" data-other-college-wrapper>
+          <label for="member-other-college">College Name</label>
+          <input class="input" id="member-other-college" name="other_college_name" type="text" data-label="College Name" placeholder="Enter college name" disabled>
+          <p class="field-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field is-hidden" data-registration-wrapper>
+          <label for="member-registration-number">Registration Number</label>
+          <input class="input" id="member-registration-number" name="registration_number" type="text" data-label="Registration Number" placeholder="23BCE5678" disabled>
           <p class="field-error" aria-live="polite"></p>
         </div>
 
@@ -106,13 +119,13 @@
   <div class="stack-lg" data-reveal>
     <section class="glass-panel detail-card">
       <div class="panel-heading">
-        <span class="section-kicker">Member Guidance</span>
-        <h2>How the match works</h2>
+        <span class="section-kicker">Join Checklist</span>
+        <h2>What happens on submit</h2>
       </div>
       <ul class="detail-list">
         <li>The team code is normalized to uppercase before validation.</li>
-        <li>If the code matches the saved leader entry, the team details appear instantly.</li>
-        <li>If the code does not match, the page shows a clear invalid team code alert.</li>
+        <li>The member record is linked to the current leader registration stored in this browser.</li>
+        <li>Registration number is requested only when a VIT campus is selected.</li>
       </ul>
     </section>
 
@@ -137,7 +150,7 @@
         </article>
       </div>
 
-      <p class="status-copy">Your member registration has been stored locally and marked as pending organizer approval.</p>
+      <p class="status-copy">Your member registration has been linked to the saved team and marked for the next steps.</p>
 
       <div class="action-row">
         <a class="button button-secondary" href="{% url 'registration_payment' %}">Open Payment Page</a>

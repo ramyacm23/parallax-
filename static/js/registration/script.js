@@ -9,6 +9,7 @@ const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
 const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".pdf"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TEAM_CODE_PATTERN = /^TEAM\d{4}$/;
+const COLLEGE_OTHER_VALUE = "OTHER";
 
 document.addEventListener("DOMContentLoaded", () => {
   setCurrentYear();
@@ -16,11 +17,15 @@ document.addEventListener("DOMContentLoaded", () => {
   enableRevealAnimations();
   enableButtonRipples();
   attachTeamCodeFormatting();
-  initializeStoredSummaries();
+  initializeCollegeFieldToggles();
+  initializePasswordToggles();
+  initializeSecretToggles();
   initializeLeaderForm();
+  initializeLeaderEditForm();
   initializeMemberForm();
   initializeProofUploadForm();
   initializeReviewForm();
+  initializeStoredSummaries();
 });
 
 function setCurrentYear() {
@@ -47,7 +52,10 @@ function enableRevealAnimations() {
   }
 
   if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    revealNodes.forEach((node) => node.classList.add("revealed"));
+    revealNodes.forEach((node) => {
+      node.classList.remove("reveal-pending");
+      node.classList.add("revealed");
+    });
     return;
   }
 
@@ -61,10 +69,21 @@ function enableRevealAnimations() {
       observer.unobserve(entry.target);
     });
   }, {
-    threshold: 0.18
+    threshold: 0.12
   });
 
-  revealNodes.forEach((node) => observer.observe(node));
+  revealNodes.forEach((node) => {
+    const rect = node.getBoundingClientRect();
+
+    if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) {
+      node.classList.remove("reveal-pending");
+      node.classList.add("revealed");
+      return;
+    }
+
+    node.classList.add("reveal-pending");
+    observer.observe(node);
+  });
 }
 
 function enableButtonRipples() {
@@ -98,6 +117,55 @@ function attachTeamCodeFormatting() {
   });
 }
 
+function initializeCollegeFieldToggles() {
+  document.querySelectorAll("[data-college-control]").forEach((select) => {
+    syncCollegeFields(select);
+    select.addEventListener("change", () => {
+      syncCollegeFields(select);
+      validateField(select);
+    });
+  });
+}
+
+function initializePasswordToggles() {
+  document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+    const target = document.getElementById(button.dataset.target);
+
+    if (!target) {
+      return;
+    }
+
+    button.addEventListener("click", () => {
+      const shouldReveal = target.type === "password";
+
+      target.type = shouldReveal ? "text" : "password";
+      button.textContent = shouldReveal ? "Hide" : "Show";
+      button.setAttribute("aria-label", shouldReveal ? "Hide password" : "Show password");
+    });
+  });
+}
+
+function initializeSecretToggles() {
+  document.querySelectorAll("[data-secret-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = document.getElementById(button.dataset.target);
+
+      if (!target) {
+        return;
+      }
+
+      const shouldReveal = target.dataset.revealed !== "true";
+      updateSecretFieldDisplay(target, button, shouldReveal);
+    });
+
+    const target = document.getElementById(button.dataset.target);
+
+    if (target) {
+      updateSecretFieldDisplay(target, button, false);
+    }
+  });
+}
+
 function initializeStoredSummaries() {
   const team = readStorage(STORAGE_KEYS.team);
   const latestProof = getLatestRecord(STORAGE_KEYS.proofs);
@@ -108,14 +176,11 @@ function initializeStoredSummaries() {
   setText("[data-leader-name-display]", team?.leaderName || "Waiting for leader registration");
   setText("[data-team-status-display]", team?.status || "Pending registration");
 
-  const leaderSuccess = document.getElementById("leaderSuccess");
-  const proofSuccess = document.getElementById("proofSuccess");
-
-  if (leaderSuccess && team) {
+  if (document.getElementById("leaderSuccess") && hasSavedTeam(team)) {
     renderLeaderSuccess(team, false);
   }
 
-  if (proofSuccess && latestProof) {
+  if (document.getElementById("proofSuccess") && latestProof) {
     renderProofSuccess(latestProof, false);
   }
 }
@@ -129,6 +194,11 @@ function initializeLeaderForm() {
 
   const alertBox = document.getElementById("leaderFormAlert");
   setupLiveValidation(form, alertBox);
+  preventLeaderPasteActions(form, alertBox);
+
+  if (hasSavedTeam(readStorage(STORAGE_KEYS.team))) {
+    setLeaderFormVisibility(false);
+  }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -138,35 +208,99 @@ function initializeLeaderForm() {
       return;
     }
 
-    const teamCode = generateTeamCode();
     const proofFile = form.querySelector('input[name="payment_proof"]').files[0];
-    const formData = new FormData(form);
-    const teamPayload = {
-      code: teamCode,
-      teamName: formData.get("team_name").trim(),
-      leaderName: formData.get("leader_name").trim(),
-      registrationNumber: formData.get("registration_number").trim(),
-      collegeName: formData.get("college_name").trim(),
-      department: formData.get("department").trim(),
-      year: formData.get("year"),
-      email: formData.get("email").trim(),
-      phone: normalizePhone(formData.get("phone")),
-      memberCount: Number(formData.get("member_count")),
-      passwordPlaceholder: formData.get("password").trim(),
-      paymentProof: buildFileSummary(proofFile),
-      status: "Pending Approval",
-      createdAt: new Date().toISOString()
-    };
+    const teamPayload = createLeaderPayload(form, proofFile);
 
     writeStorage(STORAGE_KEYS.team, teamPayload);
     writeStorage(STORAGE_KEYS.members, []);
     writeStorage(STORAGE_KEYS.proofs, []);
 
+    setFormAlert(alertBox, "", "");
     renderLeaderSuccess(teamPayload, true);
     initializeStoredSummaries();
-    setFormAlert(alertBox, "success", "Registration Successful. Your team code has been generated and stored locally.");
     form.reset();
     clearFormErrors(form);
+
+    const collegeSelect = form.querySelector("[data-college-control]");
+
+    if (collegeSelect) {
+      syncCollegeFields(collegeSelect);
+    }
+  });
+}
+
+function initializeLeaderEditForm() {
+  const form = document.getElementById("leaderEditForm");
+
+  if (!form) {
+    return;
+  }
+
+  const alertBox = document.getElementById("leaderEditAlert");
+  const openButton = document.getElementById("editLeaderDetailsButton");
+  const closeButton = document.getElementById("cancelLeaderEditButton");
+
+  setupLiveValidation(form, alertBox);
+
+  if (openButton) {
+    openButton.addEventListener("click", () => {
+      const storedTeam = readStorage(STORAGE_KEYS.team);
+
+      if (!hasSavedTeam(storedTeam)) {
+        return;
+      }
+
+      populateLeaderEditForm(storedTeam);
+      form.classList.remove("is-hidden");
+      setFormAlert(alertBox, "", "");
+      form.scrollIntoView({ behavior: getScrollBehavior(), block: "start" });
+    });
+  }
+
+  if (closeButton) {
+    closeButton.addEventListener("click", () => {
+      form.classList.add("is-hidden");
+      setFormAlert(alertBox, "", "");
+      clearFormErrors(form);
+      populateLeaderEditForm(readStorage(STORAGE_KEYS.team));
+    });
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (!validateForm(form)) {
+      setFormAlert(alertBox, "error", "Please fix the highlighted fields before saving the changes.");
+      return;
+    }
+
+    const storedTeam = readStorage(STORAGE_KEYS.team);
+
+    if (!hasSavedTeam(storedTeam)) {
+      setFormAlert(alertBox, "error", "No saved leader registration is available to update.");
+      return;
+    }
+
+    const formData = new FormData(form);
+    const nextPassword = String(formData.get("edit_password") || "").trim();
+    const updatedTeam = {
+      ...storedTeam,
+      email: String(formData.get("edit_email") || "").trim(),
+      phone: normalizePhone(String(formData.get("edit_phone") || "")),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (nextPassword) {
+      updatedTeam.password = nextPassword;
+      delete updatedTeam.passwordPlaceholder;
+    }
+
+    writeStorage(STORAGE_KEYS.team, updatedTeam);
+    renderLeaderSuccess(updatedTeam, false);
+    initializeStoredSummaries();
+    populateLeaderEditForm(updatedTeam);
+    clearFormErrors(form);
+    setFormAlert(alertBox, "success", "Team contact details updated successfully.");
   });
 }
 
@@ -194,7 +328,7 @@ function initializeMemberForm() {
     const storedTeam = readStorage(STORAGE_KEYS.team);
     const submittedCode = teamCodeField.value.trim().toUpperCase();
 
-    if (!storedTeam || storedTeam.code !== submittedCode) {
+    if (!hasSavedTeam(storedTeam) || storedTeam.code !== submittedCode) {
       setFieldError(teamCodeField, "This team code does not match the saved leader registration.");
       setFormAlert(alertBox, "error", "Invalid Team Code. Enter the exact code shared by the team leader.");
 
@@ -206,22 +340,9 @@ function initializeMemberForm() {
     }
 
     const proofFile = form.querySelector('input[name="payment_proof"]').files[0];
-    const formData = new FormData(form);
     const existingMembers = readStorage(STORAGE_KEYS.members) || [];
 
-    existingMembers.push({
-      teamCode: submittedCode,
-      memberName: formData.get("member_name").trim(),
-      registrationNumber: formData.get("registration_number").trim(),
-      collegeName: formData.get("college_name").trim(),
-      department: formData.get("department").trim(),
-      year: formData.get("year"),
-      email: formData.get("email").trim(),
-      phone: normalizePhone(formData.get("phone")),
-      paymentProof: buildFileSummary(proofFile),
-      joinedAt: new Date().toISOString(),
-      status: "Pending Approval"
-    });
+    existingMembers.push(createMemberPayload(form, proofFile, submittedCode));
 
     writeStorage(STORAGE_KEYS.members, existingMembers);
 
@@ -229,6 +350,12 @@ function initializeMemberForm() {
     setFormAlert(alertBox, "success", "Joined Successfully. Your details have been linked to the saved team.");
     form.reset();
     clearFormErrors(form);
+
+    const collegeSelect = form.querySelector("[data-college-control]");
+
+    if (collegeSelect) {
+      syncCollegeFields(collegeSelect);
+    }
   });
 }
 
@@ -351,9 +478,9 @@ function initializeReviewForm() {
     reviews.push({
       teamCode: readStorage(STORAGE_KEYS.team)?.code || null,
       overallRating: Number(formData.get("overall_rating")),
-      reviewTitle: formData.get("review_title").trim(),
-      comment: formData.get("comment").trim(),
-      suggestions: formData.get("suggestions").trim(),
+      reviewTitle: String(formData.get("review_title") || "").trim(),
+      comment: String(formData.get("comment") || "").trim(),
+      suggestions: String(formData.get("suggestions") || "").trim(),
       submittedAt: new Date().toISOString()
     });
 
@@ -372,7 +499,7 @@ function initializeReviewForm() {
 }
 
 function setupLiveValidation(form, alertBox) {
-  const fields = getFormFields(form);
+  const fields = getAllFormFields(form);
 
   fields.forEach((field) => {
     const eventName = field.type === "checkbox" || field.type === "file" || field.tagName === "SELECT" ? "change" : "blur";
@@ -404,6 +531,15 @@ function validateForm(form) {
 }
 
 function validateField(field) {
+  if (!field) {
+    return true;
+  }
+
+  if (field.disabled) {
+    clearFieldError(field);
+    return true;
+  }
+
   const label = getFieldLabel(field);
 
   if (field.type === "checkbox") {
@@ -438,18 +574,35 @@ function validateField(field) {
   }
 
   const value = field.value.trim();
+  const canonicalName = getCanonicalFieldName(field.name);
 
   if (field.required && !value) {
     setFieldError(field, `${label} is required.`);
     return false;
   }
 
-  if (field.name === "email" && value && !EMAIL_PATTERN.test(value)) {
+  if (canonicalName === "confirm_password") {
+    const passwordFieldName = field.name.startsWith("edit_") ? "edit_password" : "password";
+    const passwordField = field.form ? field.form.querySelector(`[name="${passwordFieldName}"]`) : null;
+    const passwordValue = passwordField ? passwordField.value.trim() : "";
+
+    if ((passwordValue || value || field.required) && !value) {
+      setFieldError(field, "Please confirm the password.");
+      return false;
+    }
+
+    if (value && value !== passwordValue) {
+      setFieldError(field, "Passwords do not match.");
+      return false;
+    }
+  }
+
+  if (canonicalName === "email" && value && !EMAIL_PATTERN.test(value)) {
     setFieldError(field, "Enter a valid email address.");
     return false;
   }
 
-  if (field.name === "phone" && value) {
+  if (canonicalName === "phone" && value) {
     const phoneDigits = normalizePhone(value);
 
     if (phoneDigits.length !== 10) {
@@ -504,9 +657,36 @@ function renderLeaderSuccess(team, shouldScroll) {
     return;
   }
 
-  document.getElementById("leaderTeamCode").textContent = team.code;
-  document.getElementById("leaderTeamName").textContent = team.teamName;
-  document.getElementById("leaderStatus").textContent = team.status;
+  const passwordValue = team.password || team.passwordPlaceholder || "";
+
+  setLeaderFormVisibility(false);
+  setLeaderSummaryValue("teamName", team.teamName || "Not provided");
+  setLeaderSummaryValue("leaderName", team.leaderName || "Not provided");
+  setLeaderSummaryValue("collegeName", team.collegeName || "Not provided");
+  setLeaderSummaryValue("registrationNumber", team.registrationNumber || "Not required");
+  setLeaderSummaryValue("department", team.department || "Not provided");
+  setLeaderSummaryValue("year", team.year || "Not provided");
+  setLeaderSummaryValue("email", team.email || "Not provided");
+  setLeaderSummaryValue("phone", team.phone || "Not provided");
+  setLeaderSummaryValue("memberCount", team.memberCount ? String(team.memberCount) : "Not provided");
+  setLeaderSummaryValue("status", team.status || "Pending Approval");
+  setLeaderSummaryValue("createdAt", formatTimestamp(team.updatedAt || team.createdAt));
+  toggleLeaderSummaryRow("registrationNumber", Boolean(team.registrationNumber));
+
+  const teamCodeNode = document.getElementById("leaderTeamCode");
+  const passwordNode = document.getElementById("leaderPasswordSummary");
+  const passwordButton = document.querySelector('[data-secret-toggle][data-target="leaderPasswordSummary"]');
+
+  if (teamCodeNode) {
+    teamCodeNode.textContent = team.code || "TEAM0000";
+  }
+
+  if (passwordNode && passwordButton) {
+    passwordNode.dataset.secretValue = passwordValue;
+    updateSecretFieldDisplay(passwordNode, passwordButton, false);
+  }
+
+  populateLeaderEditForm(team);
   panel.classList.remove("is-hidden");
 
   if (shouldScroll) {
@@ -523,7 +703,7 @@ function renderMemberSuccess(team, shouldScroll) {
 
   document.getElementById("memberTeamName").textContent = team.teamName;
   document.getElementById("memberLeaderName").textContent = team.leaderName;
-  document.getElementById("memberStatus").textContent = team.status;
+  document.getElementById("memberStatus").textContent = team.status || "Pending Approval";
   panel.classList.remove("is-hidden");
 
   if (shouldScroll) {
@@ -567,12 +747,22 @@ function updateDropzoneMeta(fileInput, fileMeta) {
 }
 
 function getFormFields(form) {
+  return getAllFormFields(form).filter((field) => {
+    return !field.disabled && !["submit", "reset", "button"].includes(field.type);
+  });
+}
+
+function getAllFormFields(form) {
   return Array.from(form.querySelectorAll("input, select, textarea")).filter((field) => {
     return !["submit", "reset", "button"].includes(field.type);
   });
 }
 
 function setFieldError(field, message) {
+  if (!field) {
+    return;
+  }
+
   const wrapper = field.closest(".field");
   const errorNode = wrapper ? wrapper.querySelector(".field-error") : null;
 
@@ -585,6 +775,10 @@ function setFieldError(field, message) {
 }
 
 function clearFieldError(field) {
+  if (!field) {
+    return;
+  }
+
   const wrapper = field.closest(".field");
   const errorNode = wrapper ? wrapper.querySelector(".field-error") : null;
 
@@ -597,7 +791,7 @@ function clearFieldError(field) {
 }
 
 function clearFormErrors(form) {
-  getFormFields(form).forEach((field) => clearFieldError(field));
+  Array.from(form.querySelectorAll("input, select, textarea")).forEach((field) => clearFieldError(field));
 }
 
 function setFormAlert(alertBox, state, message) {
@@ -621,6 +815,214 @@ function getFieldLabel(field) {
   return field.dataset.label || field.closest(".field")?.querySelector("label")?.textContent?.trim() || "This field";
 }
 
+function getCanonicalFieldName(name) {
+  return name.startsWith("edit_") ? name.slice(5) : name;
+}
+
+function syncCollegeFields(select) {
+  const form = select.closest("form");
+
+  if (!form) {
+    return;
+  }
+
+  const selectedOption = select.selectedOptions[0];
+  const isOtherCollege = select.value === COLLEGE_OTHER_VALUE;
+  const isVitCollege = selectedOption?.dataset.isVit === "true";
+  const otherCollegeWrapper = form.querySelector("[data-other-college-wrapper]");
+  const otherCollegeInput = form.querySelector('input[name="other_college_name"]');
+  const registrationWrapper = form.querySelector("[data-registration-wrapper]");
+  const registrationInput = form.querySelector('input[name="registration_number"]');
+
+  toggleConditionalField(otherCollegeWrapper, otherCollegeInput, isOtherCollege);
+  toggleConditionalField(registrationWrapper, registrationInput, isVitCollege);
+}
+
+function toggleConditionalField(wrapper, field, shouldShow) {
+  if (!wrapper || !field) {
+    return;
+  }
+
+  wrapper.classList.toggle("is-hidden", !shouldShow);
+  field.disabled = !shouldShow;
+  field.required = shouldShow;
+
+  if (!shouldShow) {
+    field.value = "";
+    clearFieldError(field);
+  }
+}
+
+function createLeaderPayload(form, proofFile) {
+  const formData = new FormData(form);
+
+  return {
+    code: generateTeamCode(),
+    teamName: String(formData.get("team_name") || "").trim(),
+    leaderName: String(formData.get("leader_name") || "").trim(),
+    registrationNumber: readConditionalRegistrationNumber(formData),
+    collegeName: resolveCollegeName(formData),
+    department: String(formData.get("department") || "").trim(),
+    year: String(formData.get("year") || ""),
+    email: String(formData.get("email") || "").trim(),
+    phone: normalizePhone(String(formData.get("phone") || "")),
+    memberCount: Number(formData.get("member_count")),
+    password: String(formData.get("password") || "").trim(),
+    paymentProof: buildFileSummary(proofFile),
+    status: "Pending Approval",
+    createdAt: new Date().toISOString()
+  };
+}
+
+function createMemberPayload(form, proofFile, submittedCode) {
+  const formData = new FormData(form);
+
+  return {
+    teamCode: submittedCode,
+    memberName: String(formData.get("member_name") || "").trim(),
+    registrationNumber: readConditionalRegistrationNumber(formData),
+    collegeName: resolveCollegeName(formData),
+    department: String(formData.get("department") || "").trim(),
+    year: String(formData.get("year") || ""),
+    email: String(formData.get("email") || "").trim(),
+    phone: normalizePhone(String(formData.get("phone") || "")),
+    paymentProof: buildFileSummary(proofFile),
+    joinedAt: new Date().toISOString(),
+    status: "Pending Approval"
+  };
+}
+
+function resolveCollegeName(formData) {
+  const selectedCollege = String(formData.get("college_name") || "").trim();
+
+  if (selectedCollege === COLLEGE_OTHER_VALUE) {
+    return String(formData.get("other_college_name") || "").trim();
+  }
+
+  return selectedCollege;
+}
+
+function readConditionalRegistrationNumber(formData) {
+  return String(formData.get("registration_number") || "").trim();
+}
+
+function populateLeaderEditForm(team) {
+  const form = document.getElementById("leaderEditForm");
+
+  if (!form || !team) {
+    return;
+  }
+
+  const emailField = form.querySelector('[name="edit_email"]');
+  const phoneField = form.querySelector('[name="edit_phone"]');
+  const passwordField = form.querySelector('[name="edit_password"]');
+  const confirmField = form.querySelector('[name="edit_confirm_password"]');
+
+  if (emailField) {
+    emailField.value = team.email || "";
+  }
+
+  if (phoneField) {
+    phoneField.value = team.phone || "";
+  }
+
+  if (passwordField) {
+    passwordField.value = "";
+    passwordField.type = "password";
+  }
+
+  if (confirmField) {
+    confirmField.value = "";
+    confirmField.type = "password";
+  }
+
+  form.querySelectorAll("[data-password-toggle]").forEach((button) => {
+    const target = document.getElementById(button.dataset.target);
+
+    if (target && form.contains(target)) {
+      button.textContent = "Show";
+      button.setAttribute("aria-label", "Show password");
+    }
+  });
+}
+
+function preventLeaderPasteActions(form, alertBox) {
+  const blockedEvents = ["copy", "cut", "paste", "drop"];
+  const fields = form.querySelectorAll('input:not([type="file"]):not([type="checkbox"]):not([type="submit"]):not([type="button"]), textarea');
+
+  fields.forEach((field) => {
+    blockedEvents.forEach((eventName) => {
+      field.addEventListener(eventName, (event) => {
+        if (field.disabled) {
+          return;
+        }
+
+        event.preventDefault();
+        setFormAlert(alertBox, "error", "Please type leader details manually. Copy, cut, paste, and drag-drop are disabled in this form.");
+      });
+    });
+  });
+}
+
+function setLeaderFormVisibility(shouldShow) {
+  const formShell = document.getElementById("leaderFormShell");
+
+  if (!formShell) {
+    return;
+  }
+
+  formShell.classList.toggle("is-hidden", !shouldShow);
+}
+
+function setLeaderSummaryValue(key, value) {
+  document.querySelectorAll(`[data-leader-summary="${key}"]`).forEach((node) => {
+    node.textContent = value;
+  });
+}
+
+function toggleLeaderSummaryRow(key, shouldShow) {
+  document.querySelectorAll(`[data-leader-summary-row="${key}"]`).forEach((node) => {
+    node.classList.toggle("is-hidden", !shouldShow);
+  });
+}
+
+function updateSecretFieldDisplay(target, button, shouldReveal) {
+  const secretValue = target.dataset.secretValue || "";
+
+  target.dataset.revealed = shouldReveal ? "true" : "false";
+  target.textContent = shouldReveal ? secretValue : maskPassword(secretValue);
+
+  if (button) {
+    button.hidden = !secretValue;
+    button.textContent = shouldReveal ? "Hide" : "View";
+  }
+}
+
+function maskPassword(value) {
+  return value ? "•".repeat(Math.max(value.length, 8)) : "Not set";
+}
+
+function formatTimestamp(value) {
+  if (!value) {
+    return "Not available";
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "Not available";
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(parsed);
+}
+
+function hasSavedTeam(team) {
+  return Boolean(team?.code && team?.teamName);
+}
+
 function generateTeamCode() {
   let generatedCode = "";
   const existingTeam = readStorage(STORAGE_KEYS.team);
@@ -633,6 +1035,15 @@ function generateTeamCode() {
 }
 
 function buildFileSummary(file) {
+  if (!file) {
+    return {
+      name: "",
+      size: 0,
+      sizeLabel: "0 B",
+      type: ""
+    };
+  }
+
   return {
     name: file.name,
     size: file.size,

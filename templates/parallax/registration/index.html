@@ -3,7 +3,7 @@
 {% block title %}Participant Registration | Parallax{% endblock %}
 {% block page_name %}landing{% endblock %}
 {% block hero_title %}Participant Registration{% endblock %}
-{% block hero_text %}Choose your registration type and move through a clear, premium onboarding flow built for fast team formation and smooth event coordination.{% endblock %}
+{% block hero_text %}Choose how your team wants to begin, move through the registration in a clean order, and keep the handoff to the event hub simple for every participant.{% endblock %}
 {% block hero_actions %}
 <a class="button" href="{% url 'registration_leader' %}">Create Team</a>
 <a class="button button-secondary" href="{% url 'registration_member' %}">Join Team</a>
@@ -11,28 +11,28 @@
 {% block hero_aside %}
 <div class="aside-header">
   <span class="aside-label">Registration Flow</span>
-  <span class="status-badge status-badge--live">Frontend Prototype</span>
+  <span class="status-badge status-badge--live">Live Frontend Flow</span>
 </div>
 <ul class="timeline-list">
   <li class="timeline-item is-active">
     <span>01</span>
     <div>
       <strong>Create a team</strong>
-      <p>Leaders register the squad and receive a unique team code.</p>
+      <p>The leader fills the team form, gets the team code, and reviews the submitted details on the same page.</p>
     </div>
   </li>
   <li class="timeline-item">
     <span>02</span>
     <div>
-      <strong>Add members</strong>
-      <p>Teammates join with the saved code and stay in pending review.</p>
+      <strong>Join with the code</strong>
+      <p>Members begin with the team code and see the registration number only when a VIT campus is selected.</p>
     </div>
   </li>
   <li class="timeline-item">
     <span>03</span>
     <div>
-      <strong>Upload and review</strong>
-      <p>Payment proof and event feedback are handled in the same module.</p>
+      <strong>Continue to event hub</strong>
+      <p>Payment now moves to the in-project event hub page instead of the example external link.</p>
     </div>
   </li>
 </ul>
@@ -43,11 +43,11 @@
   <article class="feature-card glass-panel" data-reveal>
     <span class="section-kicker">Team Leader</span>
     <h2>Create a new team</h2>
-    <p class="card-copy">Start the registration flow, generate the team code, and keep every team detail in one polished place.</p>
+    <p class="card-copy">Start with the leader form, generate the team code, review the saved details, and update the allowed contact fields if needed.</p>
     <ul class="inline-list">
-      <li>Generate a local demo team code</li>
-      <li>Collect participant and payment details</li>
-      <li>Share the code with teammates instantly</li>
+      <li>Manual leader entry with paste protection</li>
+      <li>Conditional VIT registration number field</li>
+      <li>Editable email, phone number, and password after submit</li>
     </ul>
     <a class="button" href="{% url 'registration_leader' %}">Create Team</a>
   </article>
@@ -55,31 +55,35 @@
   <article class="feature-card glass-panel" data-reveal>
     <span class="section-kicker">Team Member</span>
     <h2>Join an existing team</h2>
-    <p class="card-copy">Use the leader's team code to connect to the saved team and confirm your registration status.</p>
+    <p class="card-copy">Enter the team code first, finish the member details, and continue the flow with the same saved team state.</p>
     <ul class="inline-list">
-      <li>Validate team code locally</li>
-      <li>Capture member information securely</li>
-      <li>Stay ready for later backend hookup</li>
+      <li>Team code first for a clear join flow</li>
+      <li>Registration number only for VIT campuses</li>
+      <li>Shared status carried into payment and proof pages</li>
     </ul>
     <a class="button button-secondary" href="{% url 'registration_member' %}">Join Team</a>
   </article>
 </section>
 
-<section class="stack-grid" data-reveal>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step 1</span>
-    <h3>Premium-first experience</h3>
-    <p>Dark glassmorphism surfaces, measured spacing, hover lift, and smooth transitions keep the flow polished from start to finish.</p>
-  </article>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step 2</span>
-    <h3>JavaScript-powered validation</h3>
-    <p>Required fields, phone and email checks, team code verification, and friendly inline errors help avoid broken submissions.</p>
-  </article>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step 3</span>
-    <h3>LocalStorage simulation</h3>
-    <p>Leader data, joined members, proof uploads, and feedback are stored locally so the prototype behaves like a real product.</p>
-  </article>
+<section class="glass-panel detail-card" data-reveal>
+  <div class="panel-heading">
+    <span class="section-kicker">Guidelines</span>
+    <h2>Keep these ready before the team starts</h2>
+    <p>This page now holds the key guidance so the rest of the registration steps can stay focused on the forms themselves.</p>
+  </div>
+
+  <div class="guideline-columns">
+    <ul class="detail-list">
+      <li>The leader creates the team first and shares the generated team code with members.</li>
+      <li>Registration number is asked only when a VIT campus is selected in the form.</li>
+      <li>The leader must type the details manually in the first form to reduce duplicate copy-paste submissions.</li>
+      <li>After submit, the leader form closes and the same page shows the full saved summary with the team code.</li>
+    </ul>
+
+    <div class="guideline-note">
+      <strong>Current handoff</strong>
+      <p>After registration, the payment step now routes to the in-project event hub page. Payment status confirmation can be connected there later.</p>
+    </div>
+  </div>
 </section>
 {% endblock %}

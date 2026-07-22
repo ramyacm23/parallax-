@@ -59,6 +59,10 @@ def registration_payment(request):
     return render(request, 'parallax/registration/payment.html')
 
 
+def registration_event_hub(request):
+    return render(request, 'parallax/registration/event_hub.html')
+
+
 def registration_proof(request):
     return render(request, 'parallax/registration/proof_upload.html')
 
