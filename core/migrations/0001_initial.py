@@ -64,7 +64,16 @@ class Migration(migrations.Migration):
                 ('is_pinned', models.BooleanField(default=False)),
                 ('send_email', models.BooleanField(default=False)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='announcements', to=settings.AUTH_USER_MODEL)),
+                (
+                    'created_by',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name='announcements',
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
                 'ordering': ['-is_pinned', '-created_at'],
@@ -82,7 +91,14 @@ class Migration(migrations.Migration):
                 ('is_profile_complete', models.BooleanField(default=False)),
                 ('is_team_leader', models.BooleanField(default=False)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='participant', to=settings.AUTH_USER_MODEL)),
+                (
+                    'user',
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='participant',
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
@@ -94,11 +110,36 @@ class Migration(migrations.Migration):
                 ('invoice_number', models.CharField(blank=True, max_length=100, null=True)),
                 ('payment_confirmed', models.BooleanField(default=False)),
                 ('payment_confirmed_at', models.DateTimeField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending Review'), ('APPROVED', 'Approved'), ('REJECTED', 'Rejected')], default='PENDING', max_length=10)),
+                (
+                    'status',
+                    models.CharField(
+                        choices=[('PENDING', 'Pending Review'), ('APPROVED', 'Approved'), ('REJECTED', 'Rejected')],
+                        default='PENDING',
+                        max_length=10,
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('leader', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='led_team', to='core.participant')),
-                ('track', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='teams', to='core.track')),
+                (
+                    'leader',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='led_team',
+                        to='core.participant',
+                    ),
+                ),
+                (
+                    'track',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name='teams',
+                        to='core.track',
+                    ),
+                ),
             ],
             options={
                 'ordering': ['-created_at'],
@@ -107,7 +148,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='participant',
             name='team',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='members', to='core.team'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='members',
+                to='core.team',
+            ),
         ),
         migrations.CreateModel(
             name='Prize',
@@ -117,7 +164,14 @@ class Migration(migrations.Migration):
                 ('second_place', models.CharField(default='Pending sponsorship confirmation', max_length=200)),
                 ('third_place', models.CharField(default='Pending sponsorship confirmation', max_length=200)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('track', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='prize', to='core.track')),
+                (
+                    'track',
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='prize',
+                        to='core.track',
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
@@ -127,9 +181,24 @@ class Migration(migrations.Migration):
                 ('score', models.DecimalField(decimal_places=2, max_digits=6)),
                 ('remarks', models.TextField(blank=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('graded_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='graded_marks', to=settings.AUTH_USER_MODEL)),
-                ('review', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='marks', to='core.review')),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='marks', to='core.team')),
+                (
+                    'graded_by',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name='graded_marks',
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    'review',
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='marks', to='core.review'),
+                ),
+                (
+                    'team',
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='marks', to='core.team'),
+                ),
             ],
             options={
                 'unique_together': {('team', 'review')},

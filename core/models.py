@@ -7,8 +7,12 @@ from django.utils import timezone
 
 
 class Participant(models.Model):
-    # OAuth creates this record with email + name only.
-    # Profile completion is mandatory before team creation or joining.
+    APPROVAL_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='participant')
     full_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
@@ -18,6 +22,8 @@ class Participant(models.Model):
     is_profile_complete = models.BooleanField(default=False)
     team = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
     is_team_leader = models.BooleanField(default=False)
+    payment_proof = models.FileField(upload_to='payment-proofs/', blank=True, null=True)
+    approval_status = models.CharField(max_length=10, choices=APPROVAL_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -25,13 +31,16 @@ class Participant(models.Model):
 
 
 class Track(models.Model):
-    # Problem statements are split into two release sets for participant visibility.
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
     problem_statements = models.TextField(blank=True)
     problem_statements_set_one = models.TextField(blank=True)
     problem_statements_set_two = models.TextField(blank=True)
     is_published = models.BooleanField(default=False)
+    is_problem_live = models.BooleanField(
+        default=False,
+        help_text='Make this track problem statement visible to participants.',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -40,7 +49,6 @@ class Track(models.Model):
 
 
 class Prize(models.Model):
-    # Prize pool for each track; placeholder until sponsorships confirm.
     track = models.OneToOneField(Track, on_delete=models.CASCADE, related_name='prize')
     first_place = models.CharField(max_length=200, default='Pending sponsorship confirmation')
     second_place = models.CharField(max_length=200, default='Pending sponsorship confirmation')
@@ -117,8 +125,8 @@ class EventConfiguration(models.Model):
 
     @classmethod
     def get_solo(cls):
-        config, _ = cls.objects.get_or_create(pk=1)
-        return config
+        configuration, _ = cls.objects.get_or_create(pk=1)
+        return configuration
 
     @property
     def set_one_release_date(self):
@@ -163,7 +171,6 @@ class EventConfiguration(models.Model):
 
 
 class Review(models.Model):
-    # Evaluation round (e.g., Review 1, Review 2, Finals).
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     scheduled_at = models.DateTimeField()
@@ -174,7 +181,6 @@ class Review(models.Model):
 
 
 class Marks(models.Model):
-    # Grades awarded to a team for a specific review.
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='marks')
     review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='marks')
     score = models.DecimalField(max_digits=6, decimal_places=2)
@@ -192,7 +198,6 @@ class Marks(models.Model):
 
 
 class Announcement(models.Model):
-    # Admin-authored announcements; shown in dashboard + optionally emailed.
     title = models.CharField(max_length=200)
     body = models.TextField()
     is_pinned = models.BooleanField(default=False)

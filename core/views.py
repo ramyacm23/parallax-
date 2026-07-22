@@ -3,6 +3,7 @@ from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -16,16 +17,52 @@ VIT_CAMPUSES = (
     'VIT-AP',
 )
 
+DEFAULT_TRACKS = [
+    {
+        'name': 'Aviation & Space Tech',
+        'description': 'Build intelligent systems for aerospace, autonomous flight and satellite technologies.',
+        'icon': 'fa-rocket',
+    },
+    {
+        'name': 'Embedded Systems',
+        'description': 'Create real-time hardware-software systems for devices, automation and edge computing.',
+        'icon': 'fa-microchip',
+    },
+    {
+        'name': 'Healthcare & Assistive Tech',
+        'description': 'Design technologies that improve access, rehabilitation and quality of life.',
+        'icon': 'fa-heart-pulse',
+    },
+    {
+        'name': 'Sustainable Smart Infrastructure',
+        'description': 'Engineer resilient cities through smart energy, mobility and monitoring.',
+        'icon': 'fa-leaf',
+    },
+    {
+        'name': 'Communication & Cyber Physical Systems',
+        'description': 'Develop secure networks and intelligent connected infrastructure.',
+        'icon': 'fa-satellite-dish',
+    },
+]
+
 TRACK_ICON_MAP = {
-    'artificial intelligence': 'AI',
-    'machine learning': 'ML',
-    'healthcare': 'HC',
-    'fintech': 'FT',
-    'cybersecurity': 'CY',
-    'iot': 'IOT',
-    'web': 'WEB',
-    'sustainability': 'ESG',
-    'robotics': 'BOT',
+    'artificial intelligence': 'fa-brain',
+    'machine learning': 'fa-robot',
+    'healthcare': 'fa-heart-pulse',
+    'fintech': 'fa-chart-line',
+    'cybersecurity': 'fa-shield-halved',
+    'iot': 'fa-microchip',
+    'web': 'fa-globe',
+    'sustainability': 'fa-leaf',
+    'robotics': 'fa-gears',
+}
+
+INFORMATION_PAGES = {
+    'schedule': ('Review Schedule', 'Every checkpoint is designed to turn momentum into measurable progress.'),
+    'prizes': ('Prizes & Recognition', 'The prize pool and sponsor awards will be announced here.'),
+    'guidelines': ('Guidelines', 'Build boldly. Work fairly. Leave every space better than you found it.'),
+    'theme': ('Theme', 'Same problem. Different view. Better answer.'),
+    'contact': ('Contact the OC', 'Have a question? The organising committee is here to help.'),
 }
 
 
@@ -39,23 +76,41 @@ def home(request):
         'announcements': Announcement.objects.filter(is_pinned=True).order_by('-created_at'),
         'reviews': reviews,
         'stats': build_home_stats(reviews),
-        'tracks': build_home_track_cards(published_tracks),
+        'tracks': build_home_track_cards(published_tracks) if published_tracks else build_default_track_cards(),
     }
     return render(request, 'parallax/home.html', context)
 
 
 def about(request):
-    return render(request, 'parallax/about.html')
+    context = {
+        'core_members': [],
+    }
+    return render(request, 'parallax/about.html', context)
 
 
 def tracks(request):
-    published_tracks = Track.objects.filter(is_published=True).order_by('name')
-    context = {'tracks': published_tracks}
+    published_tracks = list(Track.objects.filter(is_published=True).order_by('name'))
+    context = {'tracks': published_tracks or build_default_track_cards()}
     return render(request, 'parallax/tracks.html', context)
 
 
 def faq(request):
     return render(request, 'parallax/faq.html')
+
+
+def information(request, page):
+    if page not in INFORMATION_PAGES:
+        raise Http404('Information page not found.')
+
+    heading, tagline = INFORMATION_PAGES[page]
+    context = {
+        'page': page,
+        'heading': heading,
+        'tagline': tagline,
+        'reviews': Review.objects.all().order_by('scheduled_at'),
+        'tracks': build_default_track_cards(),
+    }
+    return render(request, 'parallax/information.html', context)
 
 
 def team_login(request):
@@ -308,9 +363,7 @@ def admin_panel(request):
 
             return redirect('admin_panel')
 
-    track_summary = list(
-        Track.objects.annotate(team_total=Count('teams')).order_by('-team_total', 'name')
-    )
+    track_summary = list(Track.objects.annotate(team_total=Count('teams')).order_by('-team_total', 'name'))
     most_chosen_track = next((track for track in track_summary if track.team_total), None)
     recent_teams = Team.objects.select_related('leader', 'track').annotate(participant_total=Count('members')).order_by(
         '-created_at'
@@ -318,6 +371,8 @@ def admin_panel(request):
 
     context = {
         'configuration': configuration,
+        'pending_teams': Team.objects.filter(status='PENDING').count(),
+        'approved_teams': Team.objects.filter(status='APPROVED').count(),
         'total_registered_participants': Participant.objects.filter(team__isnull=False).count(),
         'total_payment_confirmed_participants': Participant.objects.filter(team__payment_confirmed=True).count(),
         'total_registered_teams': Team.objects.count(),
@@ -411,6 +466,27 @@ def admin_announcements(request):
     return render(request, 'parallax/admin/announcements.html', context)
 
 
+@login_required(login_url='team_login')
+def admin_tracks(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    if request.method == 'POST':
+        track = get_object_or_404(Track, id=request.POST.get('track_id'))
+        field = request.POST.get('field')
+
+        if field in {'is_published', 'is_problem_live'}:
+            setattr(track, field, not getattr(track, field))
+            track.save(update_fields=[field, 'updated_at'])
+
+        return redirect('admin_tracks')
+
+    context = {
+        'tracks': Track.objects.annotate(team_total=Count('teams')).order_by('name'),
+    }
+    return render(request, 'parallax/admin/tracks.html', context)
+
+
 def ensure_participant_record(user):
     default_email = user.email or f'{user.username}@parallax.local'
     participant, _ = Participant.objects.get_or_create(
@@ -447,6 +523,24 @@ def build_home_stats(reviews):
     ]
 
 
+def build_default_track_cards():
+    cards = []
+
+    for index, track in enumerate(DEFAULT_TRACKS, start=1):
+        cards.append(
+            {
+                'index': index,
+                'name': track['name'],
+                'icon': track['icon'],
+                'description': track['description'],
+                'prize': 'To be announced',
+                'tag': 'Open for teams',
+            }
+        )
+
+    return cards
+
+
 def build_home_track_cards(published_tracks):
     cards = []
 
@@ -457,7 +551,7 @@ def build_home_track_cards(published_tracks):
             {
                 'index': index,
                 'name': track.name,
-                'icon': TRACK_ICON_MAP.get(normalized_name, 'TRK'),
+                'icon': TRACK_ICON_MAP.get(normalized_name, 'fa-bolt'),
                 'description': track.description,
                 'prize': prize.first_place if prize else 'To be announced',
                 'tag': f'{track.team_total} teams',
@@ -468,7 +562,7 @@ def build_home_track_cards(published_tracks):
 
 
 def get_released_problem_statement_sets(track, configuration):
-    if not track:
+    if not track or not track.is_problem_live:
         return []
 
     released_sets = []

@@ -12,9 +12,9 @@ class ParticipantAdmin(admin.ModelAdmin):
 
 @admin.register(Track)
 class TrackAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_published', 'updated_at')
+    list_display = ('name', 'is_published', 'is_problem_live', 'updated_at')
     search_fields = ('name',)
-    list_filter = ('is_published',)
+    list_filter = ('is_published', 'is_problem_live')
 
 
 @admin.register(Prize)
