@@ -14,10 +14,12 @@
       <span class="dashboard-kicker">OC Dashboard</span>
       <h1 class="dashboard-title">Team management</h1>
       <p class="dashboard-copy">
-        Confirm event hub payments, update review status, and monitor team codes and track assignments.
+        This view is reserved for OC members. It keeps the full participant contact and registration details out of the participant dashboard.
       </p>
       <div class="dashboard-actions">
         <a class="dashboard-button-secondary" href="{% url 'admin_panel' %}">Back to OC Dashboard</a>
+        <a class="dashboard-button-secondary" href="{% url 'admin_marks' %}">Marks</a>
+        <a class="dashboard-button-secondary" href="{% url 'admin_announcements' %}">Announcements</a>
       </div>
     </section>
 
@@ -26,10 +28,8 @@
         <thead>
           <tr>
             <th>Team</th>
-            <th>Leader</th>
             <th>Track</th>
             <th>Participants</th>
-            <th>Invoice Ref</th>
             <th>Payment</th>
             <th>Status</th>
             <th>Actions</th>
@@ -40,16 +40,50 @@
           <tr>
             <td>
               <strong>{{ team.team_name }}</strong><br>
-              <span class="dashboard-small">{{ team.team_code }}</span>
+              <span class="dashboard-small">Code: {{ team.team_code }}</span><br>
+              <span class="dashboard-small">Leader: {{ team.leader.full_name|default:"Not assigned" }}</span><br>
+              <span class="dashboard-small">
+                Reference:
+                {% if team.invoice_number %}{{ team.invoice_number }}{% else %}-{% endif %}
+              </span>
             </td>
-            <td>{{ team.leader.full_name|default:"Not assigned" }}</td>
             <td>{{ team.track.name|default:"Not selected" }}</td>
-            <td>{{ team.participant_total }}</td>
-            <td>{{ team.invoice_number|default:"-" }}</td>
+            <td>
+              <div class="participant-detail-list">
+                {% for member in team.members.all %}
+                <article class="participant-detail-card">
+                  <div class="participant-detail-header">
+                    <strong>{{ member.full_name }}</strong>
+                    {% if member.is_team_leader %}
+                    <span class="dashboard-badge success">Leader</span>
+                    {% else %}
+                    <span class="dashboard-badge info">Member</span>
+                    {% endif %}
+                  </div>
+                  <div class="dashboard-small">{{ member.email }}</div>
+                  <div class="dashboard-small">{{ member.phone_number|default:"Phone not added" }}</div>
+                  <div class="dashboard-small">{{ member.college_name|default:"College not added" }}</div>
+                  <div class="dashboard-small">
+                    Reg No:
+                    {% if member.reg_number %}{{ member.reg_number }}{% else %}-{% endif %}
+                  </div>
+                </article>
+                {% empty %}
+                <p class="dashboard-empty">No participants attached yet.</p>
+                {% endfor %}
+              </div>
+            </td>
             <td>
               <span class="dashboard-badge {% if team.payment_confirmed %}success{% else %}pending{% endif %}">
                 {% if team.payment_confirmed %}Confirmed{% else %}Pending{% endif %}
               </span>
+              <div class="dashboard-small">
+                {% if team.payment_confirmed_at %}
+                {{ team.payment_confirmed_at|date:"M d, Y H:i" }}
+                {% else %}
+                Waiting for OC confirmation
+                {% endif %}
+              </div>
             </td>
             <td>{{ team.get_status_display }}</td>
             <td>
@@ -81,7 +115,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="8">No teams have registered yet.</td>
+            <td colspan="6">No teams have registered yet.</td>
           </tr>
           {% endfor %}
         </tbody>

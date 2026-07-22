@@ -14,16 +14,17 @@
       <span class="dashboard-kicker">Participant Dashboard</span>
       <h1 class="dashboard-title">{{ team.team_name }}</h1>
       <p class="dashboard-copy">
-        This is the centralized dashboard for the whole team. Everyone in the team sees the same shared space,
-        and the team leader keeps the edit controls.
+        This space is only for your own team progress. Organizer-only registration details and cross-team controls stay in the OC dashboard.
       </p>
       <div class="dashboard-actions">
         <span class="dashboard-badge {% if team.payment_confirmed %}success{% else %}pending{% endif %}">
           {% if team.payment_confirmed %}Payment Confirmed{% else %}Payment Pending{% endif %}
         </span>
-        <span class="dashboard-badge info">Team Code {{ team.team_code }}</span>
+        <span class="dashboard-badge {% if team.status == 'APPROVED' %}success{% elif team.status == 'REJECTED' %}danger{% else %}pending{% endif %}">
+          {{ team.get_status_display }}
+        </span>
         {% if participant.is_team_leader %}
-        <span class="dashboard-badge success">Leader Controls Enabled</span>
+        <span class="dashboard-badge info">Leader Controls Enabled</span>
         {% endif %}
       </div>
     </section>
@@ -31,35 +32,59 @@
     <section class="dashboard-stats">
       <article class="stat-card">
         <span class="stat-label">Track</span>
-        <strong class="stat-value">{{ team.track.name|default:"Not selected" }}</strong>
+        <strong class="stat-value">{{ team.track.name|default:"Pending" }}</strong>
       </article>
       <article class="stat-card">
         <span class="stat-label">Participants</span>
         <strong class="stat-value">{{ team.member_count }}</strong>
       </article>
       <article class="stat-card">
-        <span class="stat-label">Team Status</span>
-        <strong class="stat-value">{{ team.get_status_display }}</strong>
+        <span class="stat-label">Problem Sets Live</span>
+        <strong class="stat-value">{{ released_problem_set_count }}</strong>
       </article>
       <article class="stat-card">
-        <span class="stat-label">Invoice Reference</span>
-        <strong class="stat-value">{{ team.invoice_number|default:"Pending" }}</strong>
+        <span class="stat-label">Scored Reviews</span>
+        <strong class="stat-value">{{ review_score_count }}</strong>
       </article>
     </section>
 
     <section class="dashboard-grid">
       <div class="dashboard-split">
+        <article class="dashboard-card full-width">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Progress</span>
+              <h2 class="dashboard-section-title">Your team registration progress</h2>
+            </div>
+          </div>
+          <div class="progress-grid">
+            {% for item in progress_items %}
+            <article class="progress-card">
+              <div class="progress-card-header">
+                <span class="progress-label">{{ item.label }}</span>
+                <span class="dashboard-badge {{ item.tone }}">{{ item.state }}</span>
+              </div>
+              <p class="dashboard-small progress-copy">{{ item.description }}</p>
+            </article>
+            {% endfor %}
+          </div>
+        </article>
+
         <article class="dashboard-card">
           <div class="dashboard-section-header">
             <div>
               <span class="dashboard-kicker">Team Snapshot</span>
-              <h2 class="dashboard-section-title">Shared team details</h2>
+              <h2 class="dashboard-section-title">Visible to your team</h2>
             </div>
           </div>
           <div class="dashboard-summary">
             <div class="summary-row">
               <span>Leader</span>
               <strong>{{ team.leader.full_name|default:"Not assigned" }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Your Role</span>
+              <strong>{% if participant.is_team_leader %}Team Leader{% else %}Team Member{% endif %}</strong>
             </div>
             <div class="summary-row">
               <span>Team Code</span>
@@ -70,20 +95,25 @@
               <strong>{{ team.track.name|default:"Not selected" }}</strong>
             </div>
             <div class="summary-row">
-              <span>Payment Confirmed</span>
+              <span>Payment Reference</span>
               <strong>
-                {% if team.payment_confirmed %}
-                Yes{% if team.payment_confirmed_at %} on {{ team.payment_confirmed_at|date:"M d, Y H:i" }}{% endif %}
+                {% if participant.is_team_leader and team.invoice_number %}
+                {{ team.invoice_number }}
+                {% elif team.invoice_number %}
+                Submitted
                 {% else %}
-                No
+                Pending
                 {% endif %}
               </strong>
             </div>
             <div class="summary-row">
-              <span>Invoice / Payment Reference</span>
-              <strong>{{ team.invoice_number|default:"Not submitted yet" }}</strong>
+              <span>Created On</span>
+              <strong>{{ team.created_at|date:"M d, Y H:i" }}</strong>
             </div>
           </div>
+          <p class="dashboard-note">
+            Full payment data and participant contact details are limited to OC members.
+          </p>
         </article>
 
         {% if participant.is_team_leader %}
@@ -91,7 +121,7 @@
           <div class="dashboard-section-header">
             <div>
               <span class="dashboard-kicker">Leader Controls</span>
-              <h2 class="dashboard-section-title">Update team details</h2>
+              <h2 class="dashboard-section-title">Update your team</h2>
             </div>
           </div>
           <form method="post" class="dashboard-form-grid" novalidate>
@@ -129,12 +159,12 @@
         <article class="dashboard-card">
           <div class="dashboard-section-header">
             <div>
-              <span class="dashboard-kicker">Read Only</span>
-              <h2 class="dashboard-section-title">Leader-managed controls</h2>
+              <span class="dashboard-kicker">Leader Managed</span>
+              <h2 class="dashboard-section-title">Team update controls</h2>
             </div>
           </div>
           <p class="dashboard-note">
-            Team name, track, and event hub invoice reference are managed by the team leader from this dashboard.
+            Only the team leader can update the team name, track, and payment reference from this participant dashboard.
           </p>
         </article>
         {% endif %}
@@ -171,11 +201,11 @@
           {% endif %}
         </article>
 
-        <article class="dashboard-table-card">
+        <article class="dashboard-table-card full-width">
           <div class="dashboard-section-header">
             <div>
               <span class="dashboard-kicker">Review Marks</span>
-              <h2 class="dashboard-section-title">Team evaluation summary</h2>
+              <h2 class="dashboard-section-title">Your team evaluation summary</h2>
             </div>
           </div>
 
@@ -211,7 +241,7 @@
           <div class="dashboard-section-header">
             <div>
               <span class="dashboard-kicker">Team Roster</span>
-              <h2 class="dashboard-section-title">Everyone in the dashboard</h2>
+              <h2 class="dashboard-section-title">Names and roles only</h2>
             </div>
           </div>
 
@@ -221,8 +251,9 @@
               <div class="roster-person">
                 <div>
                   <strong>{{ member.full_name }}</strong>
-                  <div class="dashboard-small">{{ member.email }}</div>
-                  <div class="dashboard-small">{{ member.college_name|default:"College not set" }}</div>
+                  <div class="dashboard-small">
+                    {% if member.is_team_leader %}Team leader{% else %}Participant{% endif %}
+                  </div>
                 </div>
                 {% if member.is_team_leader %}
                 <span class="dashboard-badge success">Leader</span>

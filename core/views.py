@@ -206,7 +206,7 @@ def register_team(request):
 
 @login_required(login_url='team_login')
 def participant_dashboard(request):
-    if request.user.is_staff and not hasattr(request.user, 'participant'):
+    if request.user.is_staff:
         return redirect('admin_panel')
 
     participant = ensure_participant_record(request.user)
@@ -252,16 +252,21 @@ def participant_dashboard(request):
     marks = Marks.objects.filter(team=team).select_related('review', 'graded_by').order_by('review__scheduled_at')
     announcements = Announcement.objects.all().order_by('-is_pinned', '-created_at')
     event_config = EventConfiguration.get_solo()
+    problem_statement_sets = get_released_problem_statement_sets(team.track, event_config)
+    review_score_count = marks.count()
 
     context = {
         'participant': participant,
         'team': team,
         'team_members': team_members,
         'marks': marks,
+        'review_score_count': review_score_count,
         'announcements': announcements,
         'tracks': Track.objects.filter(is_published=True).order_by('name'),
         'event_config': event_config,
-        'problem_statement_sets': get_released_problem_statement_sets(team.track, event_config),
+        'problem_statement_sets': problem_statement_sets,
+        'released_problem_set_count': len(problem_statement_sets),
+        'progress_items': build_participant_progress(team, participant, problem_statement_sets, review_score_count),
     }
     return render(request, 'parallax/dashboard.html', context)
 
@@ -353,8 +358,11 @@ def admin_teams(request):
 
         return redirect('admin_teams')
 
-    teams = Team.objects.select_related('leader', 'track').annotate(participant_total=Count('members')).order_by(
-        '-created_at'
+    teams = (
+        Team.objects.select_related('leader', 'track')
+        .prefetch_related('members__user')
+        .annotate(participant_total=Count('members'))
+        .order_by('-created_at')
     )
     context = {'teams': teams}
     return render(request, 'parallax/admin/teams.html', context)
@@ -491,3 +499,68 @@ def parse_problem_statement_text(raw_text):
     if cleaned_items:
         return cleaned_items
     return ['Problem statements for this set have not been added yet.']
+
+
+def build_participant_progress(team, participant, problem_statement_sets, review_score_count):
+    progress_items = [
+        {
+            'label': 'Profile',
+            'state': 'Complete',
+            'tone': 'success',
+            'description': 'Your participant profile is complete and linked to the team space.',
+        },
+        {
+            'label': 'Team Access',
+            'state': team.team_code,
+            'tone': 'info',
+            'description': f'You are currently part of {team.team_name}.',
+        },
+        {
+            'label': 'Track Selection',
+            'state': team.track.name if team.track else 'Pending',
+            'tone': 'success' if team.track else 'pending',
+            'description': 'The team leader can update the selected track until payment is confirmed.',
+        },
+        {
+            'label': 'Review Status',
+            'state': team.get_status_display(),
+            'tone': 'success' if team.status == 'APPROVED' else 'danger' if team.status == 'REJECTED' else 'pending',
+            'description': 'This is the current organizer review status of your team registration.',
+        },
+        {
+            'label': 'Payment Reference',
+            'state': 'Submitted' if team.invoice_number else 'Pending',
+            'tone': 'success' if team.invoice_number else 'pending',
+            'description': 'Participants only see whether the reference is submitted. Full payment details stay with OC.',
+        },
+        {
+            'label': 'Payment Confirmation',
+            'state': 'Confirmed' if team.payment_confirmed else 'Pending OC Check',
+            'tone': 'success' if team.payment_confirmed else 'pending',
+            'description': 'OC members confirm event hub payments from the organizer dashboard.',
+        },
+        {
+            'label': 'Problem Statements',
+            'state': f'{len(problem_statement_sets)} Set(s) Live' if problem_statement_sets else 'Awaiting Release',
+            'tone': 'success' if problem_statement_sets else 'pending',
+            'description': 'Released statements for your selected track appear here automatically.',
+        },
+        {
+            'label': 'Evaluation',
+            'state': f'{review_score_count} Review(s) Scored' if review_score_count else 'No Scores Yet',
+            'tone': 'info' if review_score_count else 'pending',
+            'description': 'Review marks are shown here only for your own team progress tracking.',
+        },
+    ]
+
+    if participant.is_team_leader:
+        progress_items.append(
+            {
+                'label': 'Leader Controls',
+                'state': 'Enabled',
+                'tone': 'info',
+                'description': 'You can update the team name, track, and payment reference for your own team only.',
+            }
+        )
+
+    return progress_items

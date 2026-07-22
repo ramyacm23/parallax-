@@ -1,6 +1,8 @@
 from datetime import date, datetime
 
 from django.contrib.auth import get_user_model
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import Client, RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -38,6 +40,7 @@ class RegistrationPageTests(SimpleTestCase):
 class DashboardFlowTests(TestCase):
     def setUp(self):
         self.client = Client()
+        self.factory = RequestFactory()
         self.track = Track.objects.create(
             name='Artificial Intelligence',
             description='AI prototypes and applied intelligence builds.',
@@ -64,6 +67,21 @@ class DashboardFlowTests(TestCase):
             is_profile_complete=is_profile_complete,
         )
         return user, participant
+
+    def assign_team(self, participant, team, is_team_leader=False):
+        participant.team = team
+        participant.is_team_leader = is_team_leader
+        participant.save(update_fields=['team', 'is_team_leader'])
+
+    def build_request(self, path, user):
+        request = self.factory.get(path)
+        request.user = user
+
+        session_middleware = SessionMiddleware(lambda req: None)
+        session_middleware.process_request(request)
+        request.session.save()
+        setattr(request, '_messages', FallbackStorage(request))
+        return request
 
     def test_team_login_redirects_staff_user_to_oc_dashboard(self):
         staff_user = User.objects.create_user(
@@ -101,9 +119,7 @@ class DashboardFlowTests(TestCase):
     def test_join_team_uses_existing_team_code(self):
         leader_user, leader_participant = self.create_user_with_participant('leader_user')
         team = Team.objects.create(team_name='Solar Forge', leader=leader_participant, track=self.track)
-        leader_participant.team = team
-        leader_participant.is_team_leader = True
-        leader_participant.save(update_fields=['team', 'is_team_leader'])
+        self.assign_team(leader_participant, team, is_team_leader=True)
 
         member_user, member_participant = self.create_user_with_participant('member_user')
         self.client.force_login(member_user)
@@ -140,9 +156,7 @@ class DashboardFlowTests(TestCase):
         staff_user, _ = self.create_user_with_participant('staff_owner', is_staff=True)
         leader_user, leader_participant = self.create_user_with_participant('leader_for_team')
         team = Team.objects.create(team_name='Orbit Works', leader=leader_participant, track=self.track)
-        leader_participant.team = team
-        leader_participant.is_team_leader = True
-        leader_participant.save(update_fields=['team', 'is_team_leader'])
+        self.assign_team(leader_participant, team, is_team_leader=True)
 
         self.client.force_login(staff_user)
 
@@ -158,3 +172,57 @@ class DashboardFlowTests(TestCase):
         self.assertRedirects(response, reverse('admin_teams'), fetch_redirect_response=False)
         self.assertTrue(team.payment_confirmed)
         self.assertIsNotNone(team.payment_confirmed_at)
+
+    def test_staff_user_cannot_access_participant_dashboard(self):
+        staff_user, _ = self.create_user_with_participant('oc_staff', is_staff=True)
+        self.client.force_login(staff_user)
+
+        response = self.client.get(reverse('participant_dashboard'))
+
+        self.assertRedirects(response, reverse('admin_panel'), fetch_redirect_response=False)
+
+    def test_participant_dashboard_hides_member_contact_details(self):
+        leader_user, leader_participant = self.create_user_with_participant('progress_leader')
+        member_user, member_participant = self.create_user_with_participant('hidden_member')
+        team = Team.objects.create(
+            team_name='Progress Pulse',
+            leader=leader_participant,
+            track=self.track,
+            invoice_number='INV-12345',
+        )
+        self.assign_team(leader_participant, team, is_team_leader=True)
+        self.assign_team(member_participant, team, is_team_leader=False)
+
+        request = self.build_request(reverse('participant_dashboard'), leader_user)
+        response = views.participant_dashboard(request)
+
+        content = response.content.decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(member_participant.full_name, content)
+        self.assertNotIn(member_participant.email, content)
+        self.assertNotIn(member_participant.phone_number, content)
+        self.assertNotIn(member_participant.reg_number, content)
+
+    def test_oc_team_management_shows_participant_details_to_staff(self):
+        staff_user, _ = self.create_user_with_participant('oc_team_admin', is_staff=True)
+        leader_user, leader_participant = self.create_user_with_participant('detail_leader')
+        member_user, member_participant = self.create_user_with_participant('detail_member')
+        team = Team.objects.create(
+            team_name='Detail Matrix',
+            leader=leader_participant,
+            track=self.track,
+            invoice_number='INV-7890',
+        )
+        self.assign_team(leader_participant, team, is_team_leader=True)
+        self.assign_team(member_participant, team, is_team_leader=False)
+
+        request = self.build_request(reverse('admin_teams'), staff_user)
+        response = views.admin_teams(request)
+
+        content = response.content.decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(member_participant.email, content)
+        self.assertIn(member_participant.phone_number, content)
+        self.assertIn(member_participant.reg_number, content)

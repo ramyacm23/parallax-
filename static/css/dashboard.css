@@ -102,7 +102,9 @@
 .dashboard-stats,
 .dashboard-form-grid,
 .dashboard-cards,
-.dashboard-summary {
+.dashboard-summary,
+.progress-grid,
+.participant-detail-list {
   display: grid;
   gap: 24px;
 }
@@ -149,6 +151,10 @@
 .dashboard-section-title {
   margin: 0 0 8px;
   font-size: 1.5rem;
+}
+
+.full-width {
+  grid-column: 1 / -1;
 }
 
 .dashboard-section-header {
@@ -351,6 +357,37 @@
   border: 1px solid rgba(59, 130, 246, 0.22);
 }
 
+.progress-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.progress-card {
+  padding: 20px;
+  border-radius: 22px;
+  background: rgba(8, 20, 36, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.progress-card-header,
+.participant-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.progress-label {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.progress-copy {
+  margin: 14px 0 0;
+}
+
 .dashboard-table {
   width: 100%;
   border-collapse: collapse;
@@ -476,6 +513,21 @@
   margin: 0;
 }
 
+.participant-detail-list {
+  gap: 12px;
+}
+
+.participant-detail-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(8, 20, 36, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.participant-detail-card .dashboard-small + .dashboard-small {
+  margin-top: 6px;
+}
+
 .release-card {
   padding: 22px;
   border-radius: 22px;
@@ -499,7 +551,8 @@
   .dashboard-grid,
   .dashboard-stats,
   .dashboard-split,
-  .dashboard-cards {
+  .dashboard-cards,
+  .progress-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -518,7 +571,8 @@
   .dashboard-stats,
   .dashboard-split,
   .dashboard-cards,
-  .dashboard-form-grid {
+  .dashboard-form-grid,
+  .progress-grid {
     grid-template-columns: 1fr;
   }
 
