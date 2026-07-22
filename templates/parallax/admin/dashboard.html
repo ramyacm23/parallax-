@@ -1,0 +1,201 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}OC Dashboard | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">OC Dashboard</span>
+      <h1 class="dashboard-title">Operations and event control</h1>
+      <p class="dashboard-copy">
+        Track registrations, payment confirmations, team distribution by track, and problem statement release readiness from one view.
+      </p>
+      <div class="dashboard-actions">
+        <a class="dashboard-button-secondary" href="{% url 'admin_teams' %}">Manage Teams</a>
+        <a class="dashboard-button-secondary" href="{% url 'admin_announcements' %}">Announcements</a>
+      </div>
+    </section>
+
+    <section class="dashboard-stats">
+      <article class="stat-card">
+        <span class="stat-label">Registered Participants</span>
+        <strong class="stat-value">{{ total_registered_participants }}</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Payment Confirmed Participants</span>
+        <strong class="stat-value">{{ total_payment_confirmed_participants }}</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Registered Teams</span>
+        <strong class="stat-value">{{ total_registered_teams }}</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Payment Confirmed Teams</span>
+        <strong class="stat-value">{{ total_payment_confirmed_teams }}</strong>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+      <div class="dashboard-split">
+        <article class="dashboard-form">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Event Date</span>
+              <h2 class="dashboard-section-title">Release schedule anchor</h2>
+            </div>
+          </div>
+
+          <form method="post" class="dashboard-form-grid" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_event_date">
+            <div class="dashboard-field full">
+              <label for="event-start-date">Event Start Date</label>
+              <input class="dashboard-input" id="event-start-date" name="event_start_date" type="date" value="{{ configuration.event_start_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="dashboard-field full">
+              <button class="dashboard-button" type="submit">Update Event Date</button>
+            </div>
+          </form>
+        </article>
+
+        <article class="dashboard-card">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Track Insight</span>
+              <h2 class="dashboard-section-title">Most chosen track</h2>
+            </div>
+          </div>
+          {% if most_chosen_track %}
+          <div class="dashboard-summary">
+            <div class="summary-row">
+              <span>Track</span>
+              <strong>{{ most_chosen_track.name }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Teams Registered</span>
+              <strong>{{ most_chosen_track.team_total }}</strong>
+            </div>
+          </div>
+          {% else %}
+          <p class="dashboard-empty">No teams have selected a track yet.</p>
+          {% endif %}
+        </article>
+
+        <article class="dashboard-card">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Problem Set Release</span>
+              <h2 class="dashboard-section-title">Set 1 control</h2>
+            </div>
+          </div>
+          <div class="release-card {% if configuration.set_one_released %}live{% else %}locked{% endif %}">
+            <p class="dashboard-copy">Set 1 can be released from {{ configuration.set_one_release_date|date:"M d, Y" }} onward.</p>
+            <p class="dashboard-small">
+              Current state:
+              {% if configuration.set_one_released %}
+              released{% if configuration.set_one_released_at %} on {{ configuration.set_one_released_at|date:"M d, Y H:i" }}{% endif %}
+              {% else %}
+              hidden
+              {% endif %}
+            </p>
+            <form method="post" class="dashboard-button-row">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="toggle_set_one">
+              <input type="hidden" name="release" value="{% if configuration.set_one_released %}false{% else %}true{% endif %}">
+              <button class="{% if configuration.set_one_released %}dashboard-button-ghost{% else %}dashboard-button{% endif %}" type="submit">
+                {% if configuration.set_one_released %}Hide Set 1{% else %}Release Set 1{% endif %}
+              </button>
+            </form>
+          </div>
+        </article>
+
+        <article class="dashboard-card">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Problem Set Release</span>
+              <h2 class="dashboard-section-title">Set 2 control</h2>
+            </div>
+          </div>
+          <div class="release-card {% if configuration.set_two_released %}live{% else %}locked{% endif %}">
+            <p class="dashboard-copy">Set 2 can be released from {{ configuration.set_two_release_date|date:"M d, Y" }} onward.</p>
+            <p class="dashboard-small">
+              Current state:
+              {% if configuration.set_two_released %}
+              released{% if configuration.set_two_released_at %} on {{ configuration.set_two_released_at|date:"M d, Y H:i" }}{% endif %}
+              {% else %}
+              hidden
+              {% endif %}
+            </p>
+            <form method="post" class="dashboard-button-row">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="toggle_set_two">
+              <input type="hidden" name="release" value="{% if configuration.set_two_released %}false{% else %}true{% endif %}">
+              <button class="{% if configuration.set_two_released %}dashboard-button-ghost{% else %}dashboard-button{% endif %}" type="submit">
+                {% if configuration.set_two_released %}Hide Set 2{% else %}Release Set 2{% endif %}
+              </button>
+            </form>
+          </div>
+        </article>
+
+        <article class="dashboard-table-card">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Track Distribution</span>
+              <h2 class="dashboard-section-title">Teams per track</h2>
+            </div>
+          </div>
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Track</th>
+                <th>Registered Teams</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for track in track_summary %}
+              <tr>
+                <td>{{ track.name }}</td>
+                <td>{{ track.team_total }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2">No tracks found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </article>
+      </div>
+
+      <aside class="dashboard-sidebar">
+        <div class="dashboard-section-header">
+          <div>
+            <span class="dashboard-kicker">Recent Teams</span>
+            <h2 class="dashboard-section-title">Latest registrations</h2>
+          </div>
+        </div>
+        <ul class="dashboard-mini-list">
+          {% for team in recent_teams %}
+          <li>
+            <div>
+              <strong>{{ team.team_name }}</strong>
+              <div class="dashboard-small">{{ team.track.name|default:"Track pending" }} · {{ team.participant_total }} participants</div>
+              <div class="dashboard-small">{{ team.team_code }}</div>
+            </div>
+            <span class="dashboard-badge {% if team.payment_confirmed %}success{% else %}pending{% endif %}">
+              {% if team.payment_confirmed %}Paid{% else %}Pending{% endif %}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </aside>
+    </section>
+  </div>
+</section>
+{% endblock %}

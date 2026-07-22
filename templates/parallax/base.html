@@ -38,9 +38,24 @@
   </div>
 
   <div class="nav-right">
+    {% if request.user.is_authenticated and request.user.is_staff %}
+    <a href="{% url 'admin_panel' %}" class="nav-login-btn">OC Dashboard</a>
+    {% elif request.user.is_authenticated %}
+    <a href="{% url 'team_login' %}" class="nav-login-btn">Team Space</a>
+    {% else %}
+    <a href="{% url 'team_login' %}" class="nav-login-btn">Team Login</a>
+    {% endif %}
     <a href="{% url 'registration_index' %}" class="nav-register-btn">Register <i class="fa-solid fa-arrow-right"></i></a>
   </div>
 </nav>
+
+{% if messages %}
+<div class="flash-stack">
+  {% for message in messages %}
+  <div class="flash-message {{ message.tags|default:'info' }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
 
 {% block content %}{% endblock %}
 

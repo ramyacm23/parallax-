@@ -1,0 +1,101 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}Team Onboarding | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">Team Onboarding</span>
+      <h1 class="dashboard-title">Create a team or join an existing one</h1>
+      <p class="dashboard-copy">
+        Every participant logs in individually, but the dashboard experience is centralized around the team.
+      </p>
+      <ul class="dashboard-inline-list">
+        <li><strong>Participant:</strong> {{ participant.full_name }}</li>
+        <li><strong>College:</strong> {{ participant.college_name }}</li>
+      </ul>
+    </section>
+
+    <section class="dashboard-cards">
+      <article class="dashboard-form">
+        <div class="dashboard-section-header">
+          <div>
+            <span class="dashboard-kicker">Create Team</span>
+            <h2 class="dashboard-section-title">Leader onboarding</h2>
+          </div>
+        </div>
+
+        <form method="post" class="dashboard-form-grid" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create_team">
+
+          <div class="dashboard-field">
+            <label for="team-name">Team Name</label>
+            <input class="dashboard-input" id="team-name" name="team_name" type="text" placeholder="Nebula Builders" required>
+          </div>
+
+          <div class="dashboard-field">
+            <label for="track">Track</label>
+            <select class="dashboard-select" id="track" name="track" required>
+              <option value="">Select track</option>
+              {% for track in tracks %}
+              <option value="{{ track.id }}">{{ track.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="dashboard-field full">
+            <label for="invoice-number">Event Hub Invoice / Payment Reference</label>
+            <input
+              class="dashboard-input"
+              id="invoice-number"
+              name="invoice_number"
+              type="text"
+              placeholder="Optional for now, can be updated later by the leader"
+            >
+          </div>
+
+          <div class="dashboard-field full">
+            <button class="dashboard-button" type="submit">Create Team</button>
+          </div>
+        </form>
+      </article>
+
+      <article class="dashboard-form">
+        <div class="dashboard-section-header">
+          <div>
+            <span class="dashboard-kicker">Join Team</span>
+            <h2 class="dashboard-section-title">Member onboarding</h2>
+          </div>
+        </div>
+
+        <form method="post" class="dashboard-form-grid" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="action" value="join_team">
+
+          <div class="dashboard-field full">
+            <label for="team-code">Team Code</label>
+            <input class="dashboard-input" id="team-code" name="team_code" type="text" placeholder="TEAM4831" required>
+          </div>
+
+          <div class="dashboard-field full">
+            <p class="dashboard-note">
+              Ask the team leader for the team code shown on their participant dashboard after team creation.
+            </p>
+          </div>
+
+          <div class="dashboard-field full">
+            <button class="dashboard-button-secondary" type="submit">Join Team</button>
+          </div>
+        </form>
+      </article>
+    </section>
+  </div>
+</section>
+{% endblock %}

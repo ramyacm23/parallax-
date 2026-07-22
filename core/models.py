@@ -1,20 +1,21 @@
 import random
-import string
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class Participant(models.Model):
     # OAuth creates this record with email + name only.
-    # Profile completion (phone, college, reg_number) is mandatory before team creation.
+    # Profile completion is mandatory before team creation or joining.
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='participant')
     full_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15, blank=True)
     college_name = models.CharField(max_length=200, blank=True)
     reg_number = models.CharField(max_length=30, blank=True, null=True)
-    is_profile_complete = models.BooleanField(default=False)  # Toggled after mandatory profile form submission
+    is_profile_complete = models.BooleanField(default=False)
     team = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
     is_team_leader = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,11 +25,13 @@ class Participant(models.Model):
 
 
 class Track(models.Model):
-    # Problem statement track; publish/unpublish controlled via admin.
+    # Problem statements are split into two release sets for participant visibility.
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
-    problem_statements = models.TextField()  # Stores the five problems + requirements as structured text or JSON
-    is_published = models.BooleanField(default=False)  # Admin controls this; frontend shows only if True
+    problem_statements = models.TextField(blank=True)
+    problem_statements_set_one = models.TextField(blank=True)
+    problem_statements_set_two = models.TextField(blank=True)
+    is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -45,7 +48,7 @@ class Prize(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.track.name} — Prizes"
+        return f"{self.track.name} - Prizes"
 
 
 class Team(models.Model):
@@ -56,14 +59,20 @@ class Team(models.Model):
     ]
 
     team_name = models.CharField(max_length=100, unique=True)
+    team_code = models.CharField(max_length=8, unique=True, blank=True, editable=False)
     leader = models.ForeignKey(
         Participant, on_delete=models.CASCADE, related_name='led_team', null=True, blank=True
     )
     track = models.ForeignKey(Track, on_delete=models.SET_NULL, null=True, blank=True, related_name='teams')
-    invoice_number = models.CharField(max_length=100, blank=True, null=True)  # From Event Hub or student submission
+    invoice_number = models.CharField(max_length=100, blank=True, null=True)
+    payment_confirmed = models.BooleanField(default=False)
+    payment_confirmed_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.team_name
@@ -71,6 +80,86 @@ class Team(models.Model):
     @property
     def member_count(self):
         return self.members.count()
+
+    @classmethod
+    def generate_unique_team_code(cls):
+        while True:
+            generated_code = f"TEAM{random.randint(1000, 9999)}"
+            if not cls.objects.filter(team_code=generated_code).exists():
+                return generated_code
+
+    def save(self, *args, **kwargs):
+        if not self.team_code:
+            self.team_code = self.generate_unique_team_code()
+
+        if self.payment_confirmed and not self.payment_confirmed_at:
+            self.payment_confirmed_at = timezone.now()
+        elif not self.payment_confirmed:
+            self.payment_confirmed_at = None
+
+        super().save(*args, **kwargs)
+
+
+class EventConfiguration(models.Model):
+    event_start_date = models.DateField(default=date(2026, 8, 18))
+    set_one_released = models.BooleanField(default=False)
+    set_two_released = models.BooleanField(default=False)
+    set_one_released_at = models.DateTimeField(null=True, blank=True)
+    set_two_released_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Event Configuration'
+        verbose_name_plural = 'Event Configuration'
+
+    def __str__(self):
+        return f"Parallax configuration for {self.event_start_date.isoformat()}"
+
+    @classmethod
+    def get_solo(cls):
+        config, _ = cls.objects.get_or_create(pk=1)
+        return config
+
+    @property
+    def set_one_release_date(self):
+        return self.event_start_date - timedelta(days=4)
+
+    @property
+    def set_two_release_date(self):
+        return self.event_start_date - timedelta(days=2)
+
+    def can_release_set_one(self, today=None):
+        comparison_date = today or timezone.localdate()
+        return comparison_date >= self.set_one_release_date
+
+    def can_release_set_two(self, today=None):
+        comparison_date = today or timezone.localdate()
+        return comparison_date >= self.set_two_release_date
+
+    def update_problem_set_release(self, set_number, release, current_time=None):
+        timestamp = current_time or timezone.now()
+        comparison_date = timestamp.date()
+
+        if set_number == 1:
+            if release and not self.can_release_set_one(today=comparison_date):
+                raise ValueError('Problem Statement Set 1 can only be released four days before the event.')
+
+            self.set_one_released = release
+            self.set_one_released_at = timestamp if release else None
+            return
+
+        if set_number == 2:
+            if release and not self.set_one_released:
+                raise ValueError('Problem Statement Set 1 must be released before Set 2.')
+
+            if release and not self.can_release_set_two(today=comparison_date):
+                raise ValueError('Problem Statement Set 2 can only be released two days before the event.')
+
+            self.set_two_released = release
+            self.set_two_released_at = timestamp if release else None
+            return
+
+        raise ValueError('Unsupported problem statement set.')
 
 
 class Review(models.Model):

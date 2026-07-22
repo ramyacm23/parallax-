@@ -1,0 +1,50 @@
+{% extends 'parallax/base.html' %}
+{% load socialaccount %}
+{% load static %}
+
+{% block title %}Team Login | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">Team Access</span>
+      <h1 class="dashboard-title">Log in to the participant and OC dashboards</h1>
+      <p class="dashboard-copy">
+        Participants enter the team space through Google login. OC members using staff-enabled accounts
+        are redirected to the OC dashboard automatically.
+      </p>
+      <div class="dashboard-actions">
+        <a class="dashboard-button" href="{% provider_login_url 'google' process='login' %}">Continue with Google</a>
+        <a class="dashboard-button-secondary" href="{% url 'registration_index' %}">Open Registration</a>
+      </div>
+    </section>
+
+    <section class="dashboard-cards">
+      <article class="dashboard-card">
+        <span class="dashboard-kicker">Participants</span>
+        <h2 class="dashboard-section-title">One shared team dashboard</h2>
+        <ul class="dashboard-list">
+          <li>Create a team or join an existing team using the leader's team code.</li>
+          <li>See team roster, review scores, announcements, and released problem statements in one place.</li>
+          <li>Team leaders retain edit controls for team details and event hub invoice reference.</li>
+        </ul>
+      </article>
+
+      <article class="dashboard-card">
+        <span class="dashboard-kicker">OC Members</span>
+        <h2 class="dashboard-section-title">Live analytics and release controls</h2>
+        <ul class="dashboard-list">
+          <li>Track registered participants, confirmed payments, and track-wise team counts.</li>
+          <li>Release problem statement Set 1 and Set 2 on the OC dashboard with date-aware safeguards.</li>
+          <li>Confirm event hub payments and review team status from the operations side.</li>
+        </ul>
+      </article>
+    </section>
+  </div>
+</section>
+{% endblock %}

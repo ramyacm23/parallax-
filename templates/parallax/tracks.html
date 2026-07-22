@@ -1,0 +1,35 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}Tracks | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">Challenge Tracks</span>
+      <h1 class="dashboard-title">Published tracks for Parallax</h1>
+      <p class="dashboard-copy">Participants can register into the published tracks shown below.</p>
+    </section>
+
+    <section class="dashboard-cards">
+      {% for track in tracks %}
+      <article class="dashboard-card">
+        <span class="dashboard-kicker">Track {{ forloop.counter }}</span>
+        <h2 class="dashboard-section-title">{{ track.name }}</h2>
+        <p class="dashboard-copy">{{ track.description }}</p>
+      </article>
+      {% empty %}
+      <article class="dashboard-card">
+        <h2 class="dashboard-section-title">No tracks published yet</h2>
+        <p class="dashboard-copy">The OC team will publish the tracks here once they are ready.</p>
+      </article>
+      {% endfor %}
+    </section>
+  </div>
+</section>
+{% endblock %}

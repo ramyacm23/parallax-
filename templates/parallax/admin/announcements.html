@@ -1,0 +1,92 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}Announcements | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">OC Dashboard</span>
+      <h1 class="dashboard-title">Announcements</h1>
+      <p class="dashboard-copy">Publish pinned or regular updates that will appear on the participant dashboard.</p>
+      <div class="dashboard-actions">
+        <a class="dashboard-button-secondary" href="{% url 'admin_panel' %}">Back to OC Dashboard</a>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="dashboard-form">
+        <div class="dashboard-section-header">
+          <div>
+            <span class="dashboard-kicker">New Announcement</span>
+            <h2 class="dashboard-section-title">Create update</h2>
+          </div>
+        </div>
+
+        <form method="post" class="dashboard-form-grid" novalidate>
+          {% csrf_token %}
+          <div class="dashboard-field full">
+            <label for="announcement-title">Title</label>
+            <input class="dashboard-input" id="announcement-title" name="title" type="text" placeholder="Problem statements release update" required>
+          </div>
+          <div class="dashboard-field full">
+            <label for="announcement-body">Body</label>
+            <textarea class="dashboard-textarea" id="announcement-body" name="body" placeholder="Share the full update here." required></textarea>
+          </div>
+          <div class="dashboard-field">
+            <label>
+              <input type="checkbox" name="is_pinned">
+              Pin this announcement
+            </label>
+          </div>
+          <div class="dashboard-field">
+            <label>
+              <input type="checkbox" name="send_email">
+              Mark for email workflow later
+            </label>
+          </div>
+          <div class="dashboard-field full">
+            <button class="dashboard-button" type="submit">Publish Announcement</button>
+          </div>
+        </form>
+      </article>
+
+      <aside class="dashboard-sidebar">
+        <div class="dashboard-section-header">
+          <div>
+            <span class="dashboard-kicker">Published Updates</span>
+            <h2 class="dashboard-section-title">Announcement feed</h2>
+          </div>
+        </div>
+
+        {% if announcements %}
+        <div class="announcement-list">
+          {% for announcement in announcements %}
+          <article class="announcement-card">
+            <div class="dashboard-actions">
+              {% if announcement.is_pinned %}
+              <span class="dashboard-badge success">Pinned</span>
+              {% endif %}
+              {% if announcement.send_email %}
+              <span class="dashboard-badge info">Email Flagged</span>
+              {% endif %}
+            </div>
+            <h3>{{ announcement.title }}</h3>
+            <p>{{ announcement.body }}</p>
+            <p class="announcement-meta">{{ announcement.created_at|date:"M d, Y H:i" }}</p>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="dashboard-empty">No announcements published yet.</p>
+        {% endif %}
+      </aside>
+    </section>
+  </div>
+</section>
+{% endblock %}

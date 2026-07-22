@@ -1,0 +1,92 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}Manage Teams | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">OC Dashboard</span>
+      <h1 class="dashboard-title">Team management</h1>
+      <p class="dashboard-copy">
+        Confirm event hub payments, update review status, and monitor team codes and track assignments.
+      </p>
+      <div class="dashboard-actions">
+        <a class="dashboard-button-secondary" href="{% url 'admin_panel' %}">Back to OC Dashboard</a>
+      </div>
+    </section>
+
+    <section class="dashboard-table-card">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Leader</th>
+            <th>Track</th>
+            <th>Participants</th>
+            <th>Invoice Ref</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for team in teams %}
+          <tr>
+            <td>
+              <strong>{{ team.team_name }}</strong><br>
+              <span class="dashboard-small">{{ team.team_code }}</span>
+            </td>
+            <td>{{ team.leader.full_name|default:"Not assigned" }}</td>
+            <td>{{ team.track.name|default:"Not selected" }}</td>
+            <td>{{ team.participant_total }}</td>
+            <td>{{ team.invoice_number|default:"-" }}</td>
+            <td>
+              <span class="dashboard-badge {% if team.payment_confirmed %}success{% else %}pending{% endif %}">
+                {% if team.payment_confirmed %}Confirmed{% else %}Pending{% endif %}
+              </span>
+            </td>
+            <td>{{ team.get_status_display }}</td>
+            <td>
+              <div class="dashboard-table-actions">
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="team_id" value="{{ team.id }}">
+                  <input type="hidden" name="action" value="{% if team.payment_confirmed %}unconfirm_payment{% else %}confirm_payment{% endif %}">
+                  <button class="dashboard-button-secondary" type="submit">
+                    {% if team.payment_confirmed %}Unconfirm Payment{% else %}Confirm Payment{% endif %}
+                  </button>
+                </form>
+
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="team_id" value="{{ team.id }}">
+                  <input type="hidden" name="action" value="approve">
+                  <button class="dashboard-button" type="submit">Approve</button>
+                </form>
+
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="team_id" value="{{ team.id }}">
+                  <input type="hidden" name="action" value="reject">
+                  <button class="dashboard-button-ghost" type="submit">Reject</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">No teams have registered yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</section>
+{% endblock %}

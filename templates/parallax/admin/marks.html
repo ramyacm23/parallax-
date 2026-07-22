@@ -1,0 +1,74 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}Review Marks | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">OC Dashboard</span>
+      <h1 class="dashboard-title">Review and marks overview</h1>
+      <p class="dashboard-copy">Use this page to monitor review windows and the marks already entered for teams.</p>
+      <div class="dashboard-actions">
+        <a class="dashboard-button-secondary" href="{% url 'admin_panel' %}">Back to OC Dashboard</a>
+      </div>
+    </section>
+
+    <section class="dashboard-cards">
+      <article class="dashboard-card">
+        <span class="dashboard-kicker">Review Schedule</span>
+        <h2 class="dashboard-section-title">Configured review rounds</h2>
+        <ul class="dashboard-mini-list">
+          {% for review in reviews %}
+          <li>
+            <div>
+              <strong>{{ review.name }}</strong>
+              <div class="dashboard-small">{{ review.scheduled_at|date:"M d, Y H:i" }}</div>
+            </div>
+            <span class="dashboard-badge info">{{ review.team_total }} marks</span>
+          </li>
+          {% empty %}
+          <li>No review rounds configured yet.</li>
+          {% endfor %}
+        </ul>
+      </article>
+
+      <article class="dashboard-table-card">
+        <span class="dashboard-kicker">Latest Marks</span>
+        <h2 class="dashboard-section-title">Recorded scores</h2>
+        <table class="dashboard-table">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>Review</th>
+              <th>Score</th>
+              <th>Remarks</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mark in marks %}
+            <tr>
+              <td>{{ mark.team.team_name }}</td>
+              <td>{{ mark.review.name }}</td>
+              <td>{{ mark.score }}</td>
+              <td>{{ mark.remarks|default:"-" }}</td>
+              <td>{{ mark.updated_at|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5">No marks have been entered yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </article>
+    </section>
+  </div>
+</section>
+{% endblock %}

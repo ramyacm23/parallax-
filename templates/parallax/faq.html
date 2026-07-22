@@ -1,0 +1,31 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}FAQ | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">FAQ</span>
+      <h1 class="dashboard-title">Frequently asked questions</h1>
+      <p class="dashboard-copy">The OC team can expand this section later with event-specific answers.</p>
+    </section>
+
+    <section class="dashboard-cards">
+      <article class="dashboard-card">
+        <h2 class="dashboard-section-title">How do teams access the dashboard?</h2>
+        <p class="dashboard-copy">Use the Team Login option on the home page and continue with the configured Google sign-in flow.</p>
+      </article>
+      <article class="dashboard-card">
+        <h2 class="dashboard-section-title">When are problem statements released?</h2>
+        <p class="dashboard-copy">Set 1 becomes eligible four days before the event, and Set 2 becomes eligible two days before the event.</p>
+      </article>
+    </section>
+  </div>
+</section>
+{% endblock %}

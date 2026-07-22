@@ -1,0 +1,269 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}Participant Dashboard | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">Participant Dashboard</span>
+      <h1 class="dashboard-title">{{ team.team_name }}</h1>
+      <p class="dashboard-copy">
+        This is the centralized dashboard for the whole team. Everyone in the team sees the same shared space,
+        and the team leader keeps the edit controls.
+      </p>
+      <div class="dashboard-actions">
+        <span class="dashboard-badge {% if team.payment_confirmed %}success{% else %}pending{% endif %}">
+          {% if team.payment_confirmed %}Payment Confirmed{% else %}Payment Pending{% endif %}
+        </span>
+        <span class="dashboard-badge info">Team Code {{ team.team_code }}</span>
+        {% if participant.is_team_leader %}
+        <span class="dashboard-badge success">Leader Controls Enabled</span>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="dashboard-stats">
+      <article class="stat-card">
+        <span class="stat-label">Track</span>
+        <strong class="stat-value">{{ team.track.name|default:"Not selected" }}</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Participants</span>
+        <strong class="stat-value">{{ team.member_count }}</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Team Status</span>
+        <strong class="stat-value">{{ team.get_status_display }}</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Invoice Reference</span>
+        <strong class="stat-value">{{ team.invoice_number|default:"Pending" }}</strong>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+      <div class="dashboard-split">
+        <article class="dashboard-card">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Team Snapshot</span>
+              <h2 class="dashboard-section-title">Shared team details</h2>
+            </div>
+          </div>
+          <div class="dashboard-summary">
+            <div class="summary-row">
+              <span>Leader</span>
+              <strong>{{ team.leader.full_name|default:"Not assigned" }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Team Code</span>
+              <strong>{{ team.team_code }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Track</span>
+              <strong>{{ team.track.name|default:"Not selected" }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Payment Confirmed</span>
+              <strong>
+                {% if team.payment_confirmed %}
+                Yes{% if team.payment_confirmed_at %} on {{ team.payment_confirmed_at|date:"M d, Y H:i" }}{% endif %}
+                {% else %}
+                No
+                {% endif %}
+              </strong>
+            </div>
+            <div class="summary-row">
+              <span>Invoice / Payment Reference</span>
+              <strong>{{ team.invoice_number|default:"Not submitted yet" }}</strong>
+            </div>
+          </div>
+        </article>
+
+        {% if participant.is_team_leader %}
+        <article class="dashboard-form">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Leader Controls</span>
+              <h2 class="dashboard-section-title">Update team details</h2>
+            </div>
+          </div>
+          <form method="post" class="dashboard-form-grid" novalidate>
+            {% csrf_token %}
+            <div class="dashboard-field">
+              <label for="team-name-edit">Team Name</label>
+              <input class="dashboard-input" id="team-name-edit" name="team_name" type="text" value="{{ team.team_name }}" required>
+            </div>
+            <div class="dashboard-field">
+              <label for="track-edit">Track</label>
+              <select class="dashboard-select" id="track-edit" name="track" required>
+                <option value="">Select track</option>
+                {% for track in tracks %}
+                <option value="{{ track.id }}" {% if team.track_id == track.id %}selected{% endif %}>{{ track.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="dashboard-field full">
+              <label for="invoice-number-edit">Event Hub Invoice / Payment Reference</label>
+              <input
+                class="dashboard-input"
+                id="invoice-number-edit"
+                name="invoice_number"
+                type="text"
+                value="{{ team.invoice_number|default:'' }}"
+                placeholder="Add or update the event hub reference"
+              >
+            </div>
+            <div class="dashboard-field full">
+              <button class="dashboard-button" type="submit">Save Leader Changes</button>
+            </div>
+          </form>
+        </article>
+        {% else %}
+        <article class="dashboard-card">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Read Only</span>
+              <h2 class="dashboard-section-title">Leader-managed controls</h2>
+            </div>
+          </div>
+          <p class="dashboard-note">
+            Team name, track, and event hub invoice reference are managed by the team leader from this dashboard.
+          </p>
+        </article>
+        {% endif %}
+
+        <article class="dashboard-card">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Problem Statements</span>
+              <h2 class="dashboard-section-title">Released sets for your track</h2>
+            </div>
+          </div>
+
+          {% if problem_statement_sets %}
+          <div class="problem-set-grid">
+            {% for release_set in problem_statement_sets %}
+            <section class="problem-set-card">
+              <h3>{{ release_set.label }}</h3>
+              <p class="problem-release-meta">
+                Released {% if release_set.released_at %}on {{ release_set.released_at|date:"M d, Y H:i" }}{% else %}recently{% endif %}
+              </p>
+              <ul class="problem-set-list">
+                {% for item in release_set.items %}
+                <li class="problem-set-item">{{ item }}</li>
+                {% endfor %}
+              </ul>
+            </section>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="dashboard-note">
+            No problem statement sets are available yet for your track.
+            Set 1 opens from {{ event_config.set_one_release_date|date:"M d, Y" }} and Set 2 from {{ event_config.set_two_release_date|date:"M d, Y" }}.
+          </p>
+          {% endif %}
+        </article>
+
+        <article class="dashboard-table-card">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Review Marks</span>
+              <h2 class="dashboard-section-title">Team evaluation summary</h2>
+            </div>
+          </div>
+
+          {% if marks %}
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Review</th>
+                <th>Score</th>
+                <th>Remarks</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for mark in marks %}
+              <tr>
+                <td>{{ mark.review.name }}</td>
+                <td>{{ mark.score }} / {{ mark.review.max_marks }}</td>
+                <td>{{ mark.remarks|default:"-" }}</td>
+                <td>{{ mark.updated_at|date:"M d, Y H:i" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="dashboard-empty">Review scores will appear here once evaluations begin.</p>
+          {% endif %}
+        </article>
+      </div>
+
+      <div class="dashboard-split">
+        <aside class="dashboard-sidebar">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Team Roster</span>
+              <h2 class="dashboard-section-title">Everyone in the dashboard</h2>
+            </div>
+          </div>
+
+          <div class="team-roster">
+            {% for member in team_members %}
+            <article class="roster-card">
+              <div class="roster-person">
+                <div>
+                  <strong>{{ member.full_name }}</strong>
+                  <div class="dashboard-small">{{ member.email }}</div>
+                  <div class="dashboard-small">{{ member.college_name|default:"College not set" }}</div>
+                </div>
+                {% if member.is_team_leader %}
+                <span class="dashboard-badge success">Leader</span>
+                {% else %}
+                <span class="dashboard-badge info">Member</span>
+                {% endif %}
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+        </aside>
+
+        <aside class="dashboard-sidebar">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Announcements</span>
+              <h2 class="dashboard-section-title">Latest updates</h2>
+            </div>
+          </div>
+
+          {% if announcements %}
+          <div class="announcement-list">
+            {% for announcement in announcements %}
+            <article class="announcement-card">
+              <div class="dashboard-actions">
+                {% if announcement.is_pinned %}
+                <span class="dashboard-badge success">Pinned</span>
+                {% endif %}
+              </div>
+              <h3>{{ announcement.title }}</h3>
+              <p>{{ announcement.body }}</p>
+              <p class="announcement-meta">{{ announcement.created_at|date:"M d, Y H:i" }}</p>
+            </article>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="dashboard-empty">Announcements from the organizers will appear here.</p>
+          {% endif %}
+        </aside>
+      </div>
+    </section>
+  </div>
+</section>
+{% endblock %}

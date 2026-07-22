@@ -1,0 +1,100 @@
+{% extends 'parallax/base.html' %}
+{% load static %}
+
+{% block title %}Complete Profile | Parallax{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <div class="dashboard-wrap">
+    <section class="dashboard-hero">
+      <span class="dashboard-kicker">Profile Setup</span>
+      <h1 class="dashboard-title">Complete your participant profile</h1>
+      <p class="dashboard-copy">
+        This is the final step before you can create a team or join one. Registration number is required only for VIT campuses.
+      </p>
+      <ul class="dashboard-inline-list">
+        <li><strong>Name:</strong> {{ participant.full_name }}</li>
+        <li><strong>Email:</strong> {{ participant.email }}</li>
+      </ul>
+    </section>
+
+    <section class="dashboard-form">
+      <div class="dashboard-section-header">
+        <div>
+          <span class="dashboard-kicker">Participant Details</span>
+          <h2 class="dashboard-section-title">Profile information</h2>
+        </div>
+      </div>
+
+      <form method="post" class="dashboard-form-grid" novalidate>
+        {% csrf_token %}
+        <div class="dashboard-field">
+          <label for="phone-number">Phone Number</label>
+          <input
+            class="dashboard-input"
+            id="phone-number"
+            name="phone_number"
+            type="tel"
+            value="{{ participant.phone_number|default:'' }}"
+            placeholder="9876543210"
+            required
+          >
+        </div>
+
+        <div class="dashboard-field">
+          <label for="college-name">College</label>
+          <select class="dashboard-select" id="college-name" name="college_name" data-college-control required>
+            <option value="">Select college</option>
+            {% for campus in vit_campuses %}
+            <option value="{{ campus }}" data-is-vit="true" {% if participant.college_name == campus %}selected{% endif %}>{{ campus }}</option>
+            {% endfor %}
+            <option value="OTHER" {% if participant.college_name and participant.college_name not in vit_campuses %}selected{% endif %}>Other College</option>
+          </select>
+        </div>
+
+        <div class="dashboard-field hidden" data-other-college-wrapper>
+          <label for="other-college-name">College Name</label>
+          <input
+            class="dashboard-input"
+            id="other-college-name"
+            name="other_college_name"
+            type="text"
+            value="{% if participant.college_name and participant.college_name not in vit_campuses %}{{ participant.college_name }}{% endif %}"
+            placeholder="Enter your college name"
+            disabled
+          >
+        </div>
+
+        <div class="dashboard-field hidden" data-registration-wrapper>
+          <label for="reg-number">Registration Number</label>
+          <input
+            class="dashboard-input"
+            id="reg-number"
+            name="reg_number"
+            type="text"
+            value="{{ participant.reg_number|default:'' }}"
+            placeholder="23BCE1234"
+            disabled
+          >
+        </div>
+
+        <div class="dashboard-field full">
+          <p class="dashboard-note">Participants from non-VIT colleges can leave the registration number blank.</p>
+        </div>
+
+        <div class="dashboard-field full">
+          <button class="dashboard-button" type="submit">Save Profile</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}
