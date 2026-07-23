@@ -95,6 +95,9 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='placeholder.parallax@gmail.
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='PLACEHOLDER_APP_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 REQUIRE_INVOICE_VERIFICATION = config('REQUIRE_INVOICE_VERIFICATION', default=False, cast=bool)
+
+# External event hub the leader is sent to for team creation and payment (step 3).
+EVENT_HUB_URL = config('EVENT_HUB_URL', default='https://eventhub.example.com/parallax')
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'

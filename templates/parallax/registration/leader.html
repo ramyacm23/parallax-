@@ -3,36 +3,35 @@
 {% block title %}Team Leader Registration | Parallax{% endblock %}
 {% block page_name %}leader{% endblock %}
 {% block hero_title %}Team Leader Registration{% endblock %}
-{% block hero_text %}Create the team, submit the core details once, and review the completed registration on this same page before sending the team code to your members.{% endblock %}
+{% block hero_text %}Fill in the team leader details once. After saving, you will choose a payment option and, if you continue to payment, be handed off to the event hub to create your team and add your members.{% endblock %}
 {% block hero_actions %}
 <a class="button" href="#leaderRegistrationForm">Start Registration</a>
-<a class="button button-secondary" href="{% url 'registration_member' %}">Open Member Form</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
   <span class="aside-label">Current Step</span>
-  <span class="status-badge">Leader Setup</span>
+  <span class="status-badge">01 · Leader Details</span>
 </div>
 <ul class="timeline-list">
   <li class="timeline-item is-active">
     <span>01</span>
     <div>
       <strong>Fill the leader form</strong>
-      <p>Enter the team details manually and complete the password confirmation in one pass.</p>
+      <p>Enter the confirmed team-leader details and save.</p>
     </div>
   </li>
   <li class="timeline-item">
     <span>02</span>
     <div>
-      <strong>Review the saved summary</strong>
-      <p>After submit, the form closes and the same page shows every saved detail together with the team code.</p>
+      <strong>Choose payment</strong>
+      <p>Pay now via the event hub, or select pay later.</p>
     </div>
   </li>
   <li class="timeline-item">
     <span>03</span>
     <div>
-      <strong>Share the team code</strong>
-      <p>Members can join with the code, and only the team email, phone number, and password stay editable later.</p>
+      <strong>Event hub handoff</strong>
+      <p>Create your team, add friends and complete payment on the hub.</p>
     </div>
   </li>
 </ul>
@@ -40,251 +39,61 @@
 
 {% block registration_content %}
 <section class="content-grid content-grid--single">
-  <div class="glass-panel form-shell" id="leaderFormShell" data-reveal>
+  <div class="glass-panel form-shell" data-reveal>
     <div class="panel-heading">
       <span class="section-kicker">Leader Form</span>
-      <h2>Register Team</h2>
-      <p>Only VIT campuses will see the registration number field. Please type the leader details manually in this form.</p>
+      <h2>Register Team Leader</h2>
+      <p>These are the currently confirmed registration categories. More fields will be added when the core team finalises them.</p>
     </div>
 
-    <form id="leaderRegistrationForm" class="stack-lg" enctype="multipart/form-data" novalidate>
+    <form id="leaderServerForm" class="stack-lg" method="post" action="{% url 'registration_leader' %}" novalidate>
+      {% csrf_token %}
       <div class="field-grid">
         <div class="field">
-          <label for="team-name">Team Name</label>
-          <input class="input" id="team-name" name="team_name" type="text" data-label="Team Name" placeholder="Nebula Builders" autocomplete="off" required>
-          <p class="field-error" aria-live="polite"></p>
+          <label for="first-name">First Name</label>
+          <input class="input" id="first-name" name="first_name" type="text" placeholder="Aarav" value="{{ form_values.first_name|default:'' }}" required>
         </div>
 
         <div class="field">
-          <label for="leader-name">Leader Name</label>
-          <input class="input" id="leader-name" name="leader_name" type="text" data-label="Leader Name" placeholder="Aarav Iyer" autocomplete="off" required>
-          <p class="field-error" aria-live="polite"></p>
+          <label for="last-name">Last Name</label>
+          <input class="input" id="last-name" name="last_name" type="text" placeholder="Iyer" value="{{ form_values.last_name|default:'' }}" required>
+        </div>
+
+        <div class="field">
+          <label for="leader-email">Email ID</label>
+          <input class="input" id="leader-email" name="email" type="email" placeholder="team@college.edu" value="{{ form_values.email|default:'' }}" required>
         </div>
 
         <div class="field">
           <label for="leader-college">College</label>
-          <select class="input" id="leader-college" name="college_name" data-label="College" data-college-control required>
-            <option value="">Select college</option>
-            <option value="VIT Chennai" data-is-vit="true">VIT Chennai</option>
-            <option value="VIT Vellore" data-is-vit="true">VIT Vellore</option>
-            <option value="VIT Bhopal" data-is-vit="true">VIT Bhopal</option>
-            <option value="VIT-AP" data-is-vit="true">VIT-AP</option>
-            <option value="OTHER">Other College</option>
-          </select>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field is-hidden" data-other-college-wrapper>
-          <label for="leader-other-college">College Name</label>
-          <input class="input" id="leader-other-college" name="other_college_name" type="text" data-label="College Name" placeholder="Enter college name" autocomplete="off" disabled>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field is-hidden" data-registration-wrapper>
-          <label for="leader-registration-number">Registration Number</label>
-          <input class="input" id="leader-registration-number" name="registration_number" type="text" data-label="Registration Number" placeholder="23BCE1234" autocomplete="off" disabled>
-          <p class="field-error" aria-live="polite"></p>
+          <input class="input" id="leader-college" name="college" type="text" placeholder="VIT Chennai" value="{{ form_values.college|default:'' }}" required>
         </div>
 
         <div class="field">
           <label for="department">Department</label>
-          <input class="input" id="department" name="department" type="text" data-label="Department" placeholder="Computer Science" autocomplete="off" required>
-          <p class="field-error" aria-live="polite"></p>
+          <input class="input" id="department" name="department" type="text" placeholder="Computer Science and Engineering" value="{{ form_values.department|default:'' }}" required>
         </div>
 
         <div class="field">
-          <label for="leader-year">Year</label>
-          <select class="input" id="leader-year" name="year" data-label="Year" required>
-            <option value="">Select year</option>
-            <option value="1st Year">1st Year</option>
-            <option value="2nd Year">2nd Year</option>
-            <option value="3rd Year">3rd Year</option>
-            <option value="4th Year">4th Year</option>
-            <option value="Postgraduate">Postgraduate</option>
-          </select>
-          <p class="field-error" aria-live="polite"></p>
+          <label for="reg-number">Registration Number</label>
+          <input class="input" id="reg-number" name="reg_number" type="text" placeholder="23BCE1234" value="{{ form_values.reg_number|default:'' }}" required>
         </div>
 
         <div class="field">
-          <label for="leader-email">Team Email ID</label>
-          <input class="input" id="leader-email" name="email" type="email" data-label="Team Email ID" placeholder="team@college.edu" autocomplete="off" required>
-          <p class="field-error" aria-live="polite"></p>
+          <label for="graduation-year">Graduating Year</label>
+          <input class="input" id="graduation-year" name="graduation_year" type="number" min="2024" max="2035" placeholder="2027" value="{{ form_values.graduation_year|default:'' }}" required>
         </div>
 
         <div class="field">
-          <label for="leader-phone">Phone Number</label>
-          <input class="input" id="leader-phone" name="phone" type="tel" data-label="Phone Number" placeholder="9876543210" autocomplete="off" required>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field">
-          <label for="member-count">Number of Team Members</label>
-          <input class="input" id="member-count" name="member_count" type="number" min="1" max="10" data-label="Number of Team Members" placeholder="4" autocomplete="off" required>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field">
-          <label for="leader-password">Password</label>
-          <div class="input-with-action">
-            <input class="input" id="leader-password" name="password" type="password" data-label="Password" placeholder="Password" autocomplete="new-password" required>
-            <button class="field-action" type="button" data-password-toggle data-target="leader-password" aria-label="Show password">Show</button>
-          </div>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field">
-          <label for="leader-confirm-password">Confirm Password</label>
-          <div class="input-with-action">
-            <input class="input" id="leader-confirm-password" name="confirm_password" type="password" data-label="Confirm Password" placeholder="Confirm password" autocomplete="new-password" required>
-            <button class="field-action" type="button" data-password-toggle data-target="leader-confirm-password" aria-label="Show confirm password">Show</button>
-          </div>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field field--full">
-          <label for="leader-proof">Upload Payment Proof</label>
-          <input class="input" id="leader-proof" name="payment_proof" type="file" data-label="Payment Proof" accept=".jpg,.jpeg,.png,.pdf" required>
-          <p class="field-help">Accepted formats: JPG, JPEG, PNG, PDF. Max size 5 MB.</p>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field field--full">
-          <label class="checkbox-row" for="leader-terms">
-            <input id="leader-terms" name="terms" type="checkbox" data-label="Terms and Conditions" required>
-            <span>I accept the terms and conditions for participating in the hackathon.</span>
-          </label>
-          <p class="field-error" aria-live="polite"></p>
+          <label for="city">City</label>
+          <input class="input" id="city" name="city" type="text" placeholder="Chennai" value="{{ form_values.city|default:'' }}" required>
         </div>
       </div>
 
-      <p class="inline-note">Copy, cut, paste, and drag-drop are disabled in the leader form so the details are entered manually.</p>
-      <div class="form-alert" id="leaderFormAlert" aria-live="polite"></div>
+      <p class="field-help">6 further registration categories are pending from the core team and will be added here.</p>
 
-      <button class="button button-large" type="submit">Register Team</button>
+      <button class="button button-large" type="submit">Save &amp; Continue to Payment</button>
     </form>
   </div>
-
-  <section class="glass-panel status-card is-hidden" id="leaderSuccess" data-reveal>
-    <div class="panel-heading">
-      <span class="status-badge status-badge--success">Registration Successful</span>
-      <h2>Your team is ready</h2>
-      <p>The leader form is now closed. Review the submitted details below, update only the allowed contact fields if needed, and then share the team code with your members.</p>
-    </div>
-
-    <div class="success-layout">
-      <div class="summary-list summary-list--spaced">
-        <div class="summary-row">
-          <span>Team Name</span>
-          <strong data-leader-summary="teamName">Team Name</strong>
-        </div>
-        <div class="summary-row">
-          <span>Leader Name</span>
-          <strong data-leader-summary="leaderName">Leader Name</strong>
-        </div>
-        <div class="summary-row">
-          <span>College</span>
-          <strong data-leader-summary="collegeName">College</strong>
-        </div>
-        <div class="summary-row" data-leader-summary-row="registrationNumber">
-          <span>Registration Number</span>
-          <strong data-leader-summary="registrationNumber">23BCE1234</strong>
-        </div>
-        <div class="summary-row">
-          <span>Department</span>
-          <strong data-leader-summary="department">Department</strong>
-        </div>
-        <div class="summary-row">
-          <span>Year</span>
-          <strong data-leader-summary="year">Year</strong>
-        </div>
-        <div class="summary-row">
-          <span>Team Email ID</span>
-          <strong data-leader-summary="email">team@college.edu</strong>
-        </div>
-        <div class="summary-row">
-          <span>Phone Number</span>
-          <strong data-leader-summary="phone">9876543210</strong>
-        </div>
-        <div class="summary-row">
-          <span>Number of Team Members</span>
-          <strong data-leader-summary="memberCount">4</strong>
-        </div>
-        <div class="summary-row">
-          <span>Status</span>
-          <strong data-leader-summary="status">Pending Approval</strong>
-        </div>
-        <div class="summary-row">
-          <span>Saved On</span>
-          <strong data-leader-summary="createdAt">22 Jul 2026</strong>
-        </div>
-        <div class="summary-row">
-          <span>Password</span>
-          <div class="summary-inline">
-            <strong id="leaderPasswordSummary" data-secret-display data-secret-value="">••••••••</strong>
-            <button class="button-link" type="button" data-secret-toggle data-target="leaderPasswordSummary">View</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="team-code-spotlight">
-        <span class="metric-label">Team Code</span>
-        <strong id="leaderTeamCode">TEAM0000</strong>
-        <p>Share this team code with your teammates before they open the join page.</p>
-      </div>
-    </div>
-
-    <div class="action-row">
-      <button class="button button-secondary" type="button" id="editLeaderDetailsButton">Edit Allowed Details</button>
-      <a class="button button-secondary" href="{% url 'registration_member' %}">Open Member Page</a>
-      <a class="button" href="{% url 'registration_payment' %}">Go to Payment Page</a>
-    </div>
-
-    <form id="leaderEditForm" class="inline-edit-form is-hidden" novalidate>
-      <div class="panel-heading panel-heading--compact">
-        <span class="section-kicker">Editable Fields</span>
-        <h2>Update team email, phone number, or password</h2>
-        <p>Only these three fields can be changed after the leader registration is saved.</p>
-      </div>
-
-      <div class="field-grid">
-        <div class="field">
-          <label for="edit-email">Team Email ID</label>
-          <input class="input" id="edit-email" name="edit_email" type="email" data-label="Team Email ID" placeholder="team@college.edu" required>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field">
-          <label for="edit-phone">Phone Number</label>
-          <input class="input" id="edit-phone" name="edit_phone" type="tel" data-label="Phone Number" placeholder="9876543210" required>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field">
-          <label for="edit-password">New Password</label>
-          <div class="input-with-action">
-            <input class="input" id="edit-password" name="edit_password" type="password" data-label="New Password" placeholder="Leave blank to keep current password" autocomplete="new-password">
-            <button class="field-action" type="button" data-password-toggle data-target="edit-password" aria-label="Show new password">Show</button>
-          </div>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-
-        <div class="field">
-          <label for="edit-confirm-password">Confirm New Password</label>
-          <div class="input-with-action">
-            <input class="input" id="edit-confirm-password" name="edit_confirm_password" type="password" data-label="Confirm New Password" placeholder="Confirm new password" autocomplete="new-password">
-            <button class="field-action" type="button" data-password-toggle data-target="edit-confirm-password" aria-label="Show confirm new password">Show</button>
-          </div>
-          <p class="field-error" aria-live="polite"></p>
-        </div>
-      </div>
-
-      <div class="form-alert" id="leaderEditAlert" aria-live="polite"></div>
-
-      <div class="action-row">
-        <button class="button" type="submit">Save Changes</button>
-        <button class="button button-ghost" type="button" id="cancelLeaderEditButton">Close Editor</button>
-      </div>
-    </form>
-  </section>
 </section>
 {% endblock %}

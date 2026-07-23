@@ -1,13 +1,26 @@
 from datetime import date
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from core.models import Announcement, EventConfiguration, Marks, Participant, Review, Team, Track
+from core.emailing import leader_payment_confirmation, leader_registration_received
+from core.models import (
+    Announcement,
+    EventConfiguration,
+    LeaderRegistration,
+    Marks,
+    Participant,
+    ProblemStatement,
+    Review,
+    Team,
+    Track,
+)
 
 
 VIT_CAMPUSES = (
@@ -16,6 +29,19 @@ VIT_CAMPUSES = (
     'VIT Bhopal',
     'VIT-AP',
 )
+
+# Team-leader registration form categories currently confirmed by the core team.
+# 6 further categories are pending; add them here and to LeaderRegistration.
+REGISTRATION_FIELD_LABELS = {
+    'first_name': 'first name',
+    'last_name': 'last name',
+    'email': 'email ID',
+    'college': 'college',
+    'department': 'department',
+    'reg_number': 'registration number',
+    'graduation_year': 'graduation year',
+    'city': 'city',
+}
 
 DEFAULT_TRACKS = [
     {
@@ -133,7 +159,53 @@ def registration_index(request):
 
 
 def registration_leader(request):
-    return render(request, 'parallax/registration/leader.html')
+    """Step 1 - the team leader fills the registration form."""
+    if request.method == 'POST':
+        form_values = {key: request.POST.get(key, '').strip() for key in REGISTRATION_FIELD_LABELS}
+
+        missing = [label for key, label in REGISTRATION_FIELD_LABELS.items() if not form_values[key]]
+        graduation_year = None
+        if form_values['graduation_year']:
+            try:
+                graduation_year = int(form_values['graduation_year'])
+            except ValueError:
+                missing.append('a valid graduation year')
+
+        if missing:
+            messages.error(request, 'Please complete all fields: ' + ', '.join(missing) + '.')
+            return render(request, 'parallax/registration/leader.html', {'form_values': form_values})
+
+        registration, _ = LeaderRegistration.objects.update_or_create(
+            email=form_values['email'],
+            defaults={
+                'user': request.user if request.user.is_authenticated else None,
+                'first_name': form_values['first_name'],
+                'last_name': form_values['last_name'],
+                'college': form_values['college'],
+                'department': form_values['department'],
+                'reg_number': form_values['reg_number'],
+                'graduation_year': graduation_year,
+                'city': form_values['city'],
+            },
+        )
+
+        if not registration.registration_email_sent:
+            leader_registration_received(registration)  # placeholder - Akash owns real email
+            registration.registration_email_sent = True
+            registration.save(update_fields=['registration_email_sent', 'updated_at'])
+
+        request.session['leader_registration_id'] = registration.id
+        messages.success(request, 'Registration saved. Choose how you would like to pay.')
+        return redirect('registration_payment')
+
+    return render(request, 'parallax/registration/leader.html', {'form_values': {}})
+
+
+def _current_leader_registration(request):
+    registration_id = request.session.get('leader_registration_id')
+    if not registration_id:
+        return None
+    return LeaderRegistration.objects.filter(id=registration_id).first()
 
 
 def registration_member(request):
@@ -141,19 +213,54 @@ def registration_member(request):
 
 
 def registration_payment(request):
-    return render(request, 'parallax/registration/payment.html')
+    """Step 2 - payment choice: pay later or continue to the event hub."""
+    registration = _current_leader_registration(request)
+    if registration is None:
+        messages.info(request, 'Please complete the team leader registration first.')
+        return redirect('registration_leader')
+
+    if request.method == 'POST':
+        choice = request.POST.get('payment_choice')
+        if choice == 'pay_later':
+            registration.payment_status = LeaderRegistration.PAYMENT_PAY_LATER
+            registration.save(update_fields=['payment_status', 'updated_at'])
+            messages.success(request, 'Saved. You can complete the payment later from the event hub.')
+            return redirect('registration_payment')
+        if choice == 'go_to_payment':
+            return redirect('registration_event_hub')
+        messages.error(request, 'Choose a payment option to continue.')
+
+    context = {
+        'registration': registration,
+        'event_hub_url': getattr(settings, 'EVENT_HUB_URL', '#'),
+    }
+    return render(request, 'parallax/registration/payment.html', context)
 
 
 def registration_event_hub(request):
-    return render(request, 'parallax/registration/event_hub.html')
+    """Steps 3 & 4 - hand off to the external event hub and handle the return."""
+    registration = _current_leader_registration(request)
+    if registration is None:
+        messages.info(request, 'Please complete the team leader registration first.')
+        return redirect('registration_leader')
 
+    # Step 4: the event hub redirects back with ?status=paid once payment is done.
+    if request.GET.get('status') == 'paid':
+        if registration.payment_status != LeaderRegistration.PAYMENT_PAID:
+            registration.payment_status = LeaderRegistration.PAYMENT_PAID
+            registration.save(update_fields=['payment_status', 'updated_at'])
+        if not registration.payment_email_sent:
+            leader_payment_confirmation(registration)  # placeholder - Akash owns real email
+            registration.payment_email_sent = True
+            registration.save(update_fields=['payment_email_sent', 'updated_at'])
+        messages.success(request, 'Payment confirmed. Welcome to Parallax 2026!')
+        return redirect('registration_payment')
 
-def registration_proof(request):
-    return render(request, 'parallax/registration/proof_upload.html')
-
-
-def registration_review(request):
-    return render(request, 'parallax/registration/review.html')
+    context = {
+        'registration': registration,
+        'event_hub_url': getattr(settings, 'EVENT_HUB_URL', '#'),
+    }
+    return render(request, 'parallax/registration/event_hub.html', context)
 
 
 @login_required(login_url='team_login')
@@ -279,6 +386,39 @@ def participant_dashboard(request):
             messages.error(request, 'Only the team leader can update team controls.')
             return redirect('participant_dashboard')
 
+        action = request.POST.get('action', '').strip()
+
+        if action == 'book_problem_statement':
+            problem_statement_id = request.POST.get('problem_statement', '').strip()
+            if not problem_statement_id:
+                messages.error(request, 'Select a problem statement to book.')
+                return redirect('participant_dashboard')
+
+            with transaction.atomic():
+                problem_statement = (
+                    ProblemStatement.objects.select_for_update()
+                    .filter(id=problem_statement_id, is_active=True, track__is_problem_live=True)
+                    .first()
+                )
+                if problem_statement is None:
+                    messages.error(request, 'That problem statement is not available for booking.')
+                    return redirect('participant_dashboard')
+
+                already_booked = problem_statement.booked_teams.exclude(pk=team.pk).count()
+                if problem_statement.slot_capacity and already_booked >= problem_statement.slot_capacity:
+                    messages.error(
+                        request,
+                        'All slots for this problem statement are filled. Please choose another one.',
+                    )
+                    return redirect('participant_dashboard')
+
+                team.problem_statement = problem_statement
+                team.track = problem_statement.track
+                team.save(update_fields=['problem_statement', 'track', 'updated_at'])
+
+            messages.success(request, f'Slot booked for "{problem_statement.title}".')
+            return redirect('participant_dashboard')
+
         team_name = request.POST.get('team_name', '').strip()
         track_id = request.POST.get('track', '').strip()
         invoice_number = request.POST.get('invoice_number', '').strip()
@@ -310,6 +450,13 @@ def participant_dashboard(request):
     problem_statement_sets = get_released_problem_statement_sets(team.track, event_config)
     review_score_count = marks.count()
 
+    bookable_problem_statements = list(
+        ProblemStatement.objects.filter(is_active=True, track__is_problem_live=True)
+        .select_related('track')
+        .annotate(booked_total=Count('booked_teams'))
+        .order_by('track__name', 'code', 'title')
+    )
+
     context = {
         'participant': participant,
         'team': team,
@@ -321,6 +468,8 @@ def participant_dashboard(request):
         'event_config': event_config,
         'problem_statement_sets': problem_statement_sets,
         'released_problem_set_count': len(problem_statement_sets),
+        'bookable_problem_statements': bookable_problem_statements,
+        'booked_problem_statement': team.problem_statement,
         'progress_items': build_participant_progress(team, participant, problem_statement_sets, review_score_count),
     }
     return render(request, 'parallax/dashboard.html', context)
@@ -369,6 +518,20 @@ def admin_panel(request):
         '-created_at'
     )[:8]
 
+    total_leader_registrations = LeaderRegistration.objects.count()
+    total_leaders_paid = LeaderRegistration.objects.filter(
+        payment_status=LeaderRegistration.PAYMENT_PAID
+    ).count()
+    total_leaders_pay_later = LeaderRegistration.objects.filter(
+        payment_status=LeaderRegistration.PAYMENT_PAY_LATER
+    ).count()
+
+    problem_statement_summary = list(
+        ProblemStatement.objects.select_related('track')
+        .annotate(booked_total=Count('booked_teams'))
+        .order_by('track__name', 'code', 'title')
+    )
+
     context = {
         'configuration': configuration,
         'pending_teams': Team.objects.filter(status='PENDING').count(),
@@ -377,6 +540,10 @@ def admin_panel(request):
         'total_payment_confirmed_participants': Participant.objects.filter(team__payment_confirmed=True).count(),
         'total_registered_teams': Team.objects.count(),
         'total_payment_confirmed_teams': Team.objects.filter(payment_confirmed=True).count(),
+        'total_leader_registrations': total_leader_registrations,
+        'total_leaders_paid': total_leaders_paid,
+        'total_leaders_pay_later': total_leaders_pay_later,
+        'problem_statement_summary': problem_statement_summary,
         'most_chosen_track': most_chosen_track,
         'track_summary': track_summary,
         'recent_teams': recent_teams,
@@ -472,9 +639,36 @@ def admin_tracks(request):
         return redirect('home')
 
     if request.method == 'POST':
+        action = request.POST.get('action', 'toggle_track')
+
+        if action == 'add_problem_statement':
+            track = get_object_or_404(Track, id=request.POST.get('track_id'))
+            title = request.POST.get('title', '').strip()
+            if not title:
+                messages.error(request, 'Problem statement title is required.')
+            else:
+                ProblemStatement.objects.create(
+                    track=track,
+                    code=request.POST.get('code', '').strip(),
+                    title=title,
+                    description=request.POST.get('description', '').strip(),
+                    slot_capacity=_parse_positive_int(request.POST.get('slot_capacity')),
+                )
+                messages.success(request, f'Problem statement "{title}" added.')
+            return redirect('admin_tracks')
+
+        if action == 'update_slot_capacity':
+            problem_statement = get_object_or_404(
+                ProblemStatement, id=request.POST.get('problem_statement_id')
+            )
+            problem_statement.slot_capacity = _parse_positive_int(request.POST.get('slot_capacity'))
+            problem_statement.is_active = request.POST.get('is_active') == 'on'
+            problem_statement.save(update_fields=['slot_capacity', 'is_active', 'updated_at'])
+            messages.success(request, f'Slots updated for "{problem_statement.title}".')
+            return redirect('admin_tracks')
+
         track = get_object_or_404(Track, id=request.POST.get('track_id'))
         field = request.POST.get('field')
-
         if field in {'is_published', 'is_problem_live'}:
             setattr(track, field, not getattr(track, field))
             track.save(update_fields=[field, 'updated_at'])
@@ -483,8 +677,20 @@ def admin_tracks(request):
 
     context = {
         'tracks': Track.objects.annotate(team_total=Count('teams')).order_by('name'),
+        'problem_statements': (
+            ProblemStatement.objects.select_related('track')
+            .annotate(booked_total=Count('booked_teams'))
+            .order_by('track__name', 'code', 'title')
+        ),
     }
     return render(request, 'parallax/admin/tracks.html', context)
+
+
+def _parse_positive_int(raw_value):
+    try:
+        return max(int(raw_value), 0)
+    except (TypeError, ValueError):
+        return 0
 
 
 def ensure_participant_record(user):

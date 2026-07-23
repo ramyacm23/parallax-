@@ -1,1 +1,75 @@
-{% extends 'parallax/base.html' %}{% block content %}<main class="page-shell"><p class="eyebrow">Organising committee</p><h1 class="page-title">Track <span>release desk.</span></h1><p class="lead">Publish a track independently of its challenge statement. Problem statements should be switched on four days before the event.</p><div class="table-card">{% for track in tracks %}<article class="team-row"><div><b>{{ track.name }}</b><p>Track page: {% if track.is_published %}Live{% else %}Hidden{% endif %} · Problem statement: {% if track.is_problem_live %}Live{% else %}Locked{% endif %}</p></div><div class="toggle-actions"><form method="post">{% csrf_token %}<input type="hidden" name="track_id" value="{{ track.id }}"><input type="hidden" name="field" value="is_published"><button class="btn-out">Toggle track</button></form><form method="post">{% csrf_token %}<input type="hidden" name="track_id" value="{{ track.id }}"><input type="hidden" name="field" value="is_problem_live"><button class="btn-cta">Toggle problems</button></form></div></article>{% empty %}<p>Create tracks in <a href="{% url 'admin:core_track_add' %}">Django admin</a>, then control their release here.</p>{% endfor %}</div></main>{% endblock %}
+{% extends 'parallax/base.html' %}
+{% block title %}Track & Slot Desk | Parallax{% endblock %}
+{% block content %}
+<main class="page-shell">
+  <p class="eyebrow">Organising committee</p>
+  <h1 class="page-title">Track &amp; slot <span>release desk.</span></h1>
+  <p class="lead">Publish a track independently of its challenge statement, and set first-come-first-served slot capacity for each problem statement. Problem statements should be switched on four days before the event.</p>
+
+  <div class="table-card">
+    {% for track in tracks %}
+    <article class="team-row">
+      <div>
+        <b>{{ track.name }}</b>
+        <p>Track page: {% if track.is_published %}Live{% else %}Hidden{% endif %} · Problem statement: {% if track.is_problem_live %}Live{% else %}Locked{% endif %}</p>
+      </div>
+      <div class="toggle-actions">
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="track_id" value="{{ track.id }}">
+          <input type="hidden" name="field" value="is_published">
+          <button class="btn-out">Toggle track</button>
+        </form>
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="track_id" value="{{ track.id }}">
+          <input type="hidden" name="field" value="is_problem_live">
+          <button class="btn-cta">Toggle problems</button>
+        </form>
+      </div>
+    </article>
+    {% empty %}
+    <p>Create tracks in <a href="{% url 'admin:core_track_add' %}">Django admin</a>, then control their release here.</p>
+    {% endfor %}
+  </div>
+
+  <h2 class="page-title" style="margin-top:2rem;">Problem statement <span>slots.</span></h2>
+  <p class="lead">Enter the number of teams allowed on each problem statement. Booking is first-come, first-served — once slots are full, team leaders must pick another.</p>
+
+  <div class="table-card">
+    <article class="team-row">
+      <form method="post" class="dashboard-form-grid">{% csrf_token %}
+        <input type="hidden" name="action" value="add_problem_statement">
+        <select name="track_id" required>
+          <option value="">Select track</option>
+          {% for track in tracks %}<option value="{{ track.id }}">{{ track.name }}</option>{% endfor %}
+        </select>
+        <input type="text" name="code" placeholder="Code (e.g. AIML-01)">
+        <input type="text" name="title" placeholder="Problem statement title" required>
+        <input type="number" name="slot_capacity" min="0" placeholder="Slots" required>
+        <button class="btn-cta" type="submit">Add problem statement</button>
+      </form>
+    </article>
+
+    {% for ps in problem_statements %}
+    <article class="team-row">
+      <div>
+        <b>{{ ps.title }}</b>
+        <p>{{ ps.track.name }}{% if ps.code %} · {{ ps.code }}{% endif %} · Booked {{ ps.booked_total }}/{{ ps.slot_capacity }} · {% if ps.is_active %}Active{% else %}Inactive{% endif %}</p>
+      </div>
+      <div class="toggle-actions">
+        <form method="post" class="dashboard-button-row">{% csrf_token %}
+          <input type="hidden" name="action" value="update_slot_capacity">
+          <input type="hidden" name="problem_statement_id" value="{{ ps.id }}">
+          <input type="number" name="slot_capacity" min="0" value="{{ ps.slot_capacity }}" aria-label="Slot capacity">
+          <label style="display:inline-flex;align-items:center;gap:.35rem;">
+            <input type="checkbox" name="is_active" {% if ps.is_active %}checked{% endif %}> Active
+          </label>
+          <button class="btn-out" type="submit">Save slots</button>
+        </form>
+      </div>
+    </article>
+    {% empty %}
+    <p>No problem statements yet. Add one above to open first-come-first-served booking.</p>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

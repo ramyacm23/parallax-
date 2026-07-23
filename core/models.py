@@ -72,6 +72,9 @@ class Team(models.Model):
         Participant, on_delete=models.CASCADE, related_name='led_team', null=True, blank=True
     )
     track = models.ForeignKey(Track, on_delete=models.SET_NULL, null=True, blank=True, related_name='teams')
+    problem_statement = models.ForeignKey(
+        'ProblemStatement', on_delete=models.SET_NULL, null=True, blank=True, related_name='booked_teams'
+    )
     invoice_number = models.CharField(max_length=100, blank=True, null=True)
     payment_confirmed = models.BooleanField(default=False)
     payment_confirmed_at = models.DateTimeField(null=True, blank=True)
@@ -212,3 +215,89 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class LeaderRegistration(models.Model):
+    """Standalone team-leader registration form and payment funnel.
+
+    Powers the OC dashboard counters (registered / paid / pay-later). The real
+    confirmation emails are owned by Akash; the send_* helpers are placeholders.
+    """
+
+    PAYMENT_PENDING = 'PENDING'
+    PAYMENT_PAY_LATER = 'PAY_LATER'
+    PAYMENT_PAID = 'PAID'
+    PAYMENT_STATUS_CHOICES = [
+        (PAYMENT_PENDING, 'Not started'),
+        (PAYMENT_PAY_LATER, 'Pay later'),
+        (PAYMENT_PAID, 'Paid'),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='leader_registration',
+    )
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    college = models.CharField(max_length=200)
+    department = models.CharField(max_length=150)
+    reg_number = models.CharField('Registration number', max_length=50)
+    graduation_year = models.PositiveIntegerField()
+    city = models.CharField(max_length=120)
+    # NOTE: 6 further form categories are pending from the core team; add them here.
+    payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_PENDING)
+    registration_email_sent = models.BooleanField(default=False)
+    payment_email_sent = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.email})"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
+
+    @property
+    def has_paid(self):
+        return self.payment_status == self.PAYMENT_PAID
+
+
+class ProblemStatement(models.Model):
+    """A bookable problem statement with a fixed first-come-first-served slot pool.
+
+    Slot capacity is entered manually by the OC in the admin dashboard.
+    """
+
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, related_name='problem_statement_slots')
+    code = models.CharField(max_length=20, blank=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    slot_capacity = models.PositiveIntegerField(
+        default=0, help_text='Total teams allowed to book this problem statement.'
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['track__name', 'code', 'title']
+
+    def __str__(self):
+        return f"{self.title} ({self.track.name})"
+
+    @property
+    def slots_filled(self):
+        return self.booked_teams.count()
+
+    @property
+    def slots_available(self):
+        return max(self.slot_capacity - self.slots_filled, 0)
+
+    @property
+    def is_full(self):
+        return self.slot_capacity > 0 and self.slots_filled >= self.slot_capacity

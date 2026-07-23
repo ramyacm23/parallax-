@@ -2,67 +2,80 @@
 
 {% block title %}Payment | Parallax{% endblock %}
 {% block page_name %}payment{% endblock %}
-{% block hero_title %}Payment & Event Hub{% endblock %}
-{% block hero_text %}The payment handoff now routes to an internal event hub page instead of the example domain, while paid-status confirmation stays ready for later integration.{% endblock %}
+{% block hero_title %}Choose Your Payment Option{% endblock %}
+{% block hero_text %}Your leader registration is saved. Pay now by continuing to the event hub where you can create your team, add your friends and complete the payment — or choose to pay later and finish it from the hub anytime.{% endblock %}
 {% block hero_actions %}
-<a class="button" href="{% url 'registration_event_hub' %}">Proceed to Event Hub</a>
-<a class="button button-secondary" href="{% url 'registration_proof' %}">Upload Proof</a>
+<a class="button" href="#paymentChoice">Choose Option</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
-  <span class="aside-label">Current Handoff</span>
-  <span class="status-badge status-badge--success">Internal Route Live</span>
+  <span class="aside-label">Current Step</span>
+  <span class="status-badge">02 · Payment</span>
 </div>
 <div class="stack-sm">
-  <p class="muted-copy">This page now points to the in-project event hub route so the flow stays inside the site until the final payment integration is confirmed.</p>
+  <p class="muted-copy">Continue to the event hub to create your team and pay, or select pay later.</p>
   <div class="info-pill">
-    <span>Current destination</span>
-    <strong>/registration/event-hub/</strong>
+    <span>Payment status</span>
+    <strong>{{ registration.get_payment_status_display }}</strong>
   </div>
 </div>
 {% endblock %}
 
 {% block registration_content %}
 <section class="content-grid content-grid--two">
-  <article class="glass-panel detail-card" data-reveal>
+  <article class="glass-panel detail-card" id="paymentChoice" data-reveal>
     <div class="panel-heading">
       <span class="section-kicker">Next Action</span>
-      <h2>Continue through the event hub</h2>
-      <p>Use the button below to move to the normal event hub page. Once the payment platform response is finalized, confirmation can be connected there without changing this registration flow.</p>
+      <h2>How would you like to pay?</h2>
+      <p>“Go to payment” redirects you to the event hub to log in, create your team, add your friends and pay. “Pay later” keeps your registration saved so you can complete payment from the hub anytime.</p>
     </div>
 
-    <div class="action-row">
-      <a class="button button-large" href="{% url 'registration_event_hub' %}">Proceed to Event Hub</a>
-      <a class="button button-secondary" href="{% url 'registration_proof' %}">Go to Proof Upload</a>
-    </div>
+    <form method="post" action="{% url 'registration_payment' %}" class="stack-md">
+      {% csrf_token %}
+      <div class="action-row">
+        <button class="button button-large" type="submit" name="payment_choice" value="go_to_payment">Go to Payment</button>
+        <button class="button button-secondary" type="submit" name="payment_choice" value="pay_later">Pay Later</button>
+      </div>
+    </form>
 
+    {% if registration.has_paid %}
     <div class="info-banner">
-      <strong>Integration note</strong>
-      <span>Automatic paid-status confirmation is intentionally left pending until the event platform response details are shared.</span>
+      <strong>Payment confirmed</strong>
+      <span>We have recorded your payment. A confirmation email will follow.</span>
     </div>
+    {% elif registration.payment_status == 'PAY_LATER' %}
+    <div class="info-banner">
+      <strong>Marked as pay later</strong>
+      <span>You can finish the payment on the event hub whenever you are ready.</span>
+    </div>
+    {% endif %}
   </article>
 
   <aside class="glass-panel detail-card" data-reveal>
     <div class="panel-heading">
       <span class="section-kicker">Saved Registration</span>
-      <h2>Current team snapshot</h2>
+      <h2>Your details</h2>
     </div>
     <div class="summary-list">
       <div class="summary-row">
-        <span>Team Code</span>
-        <strong data-team-code-display>No team code yet</strong>
-      </div>
-      <div class="summary-row">
-        <span>Team Name</span>
-        <strong data-team-name-display>Waiting for leader registration</strong>
-      </div>
-      <div class="summary-row">
         <span>Leader Name</span>
-        <strong data-leader-name-display>Waiting for leader registration</strong>
+        <strong>{{ registration.full_name }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Email</span>
+        <strong>{{ registration.email }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>College</span>
+        <strong>{{ registration.college }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Department</span>
+        <strong>{{ registration.department }}</strong>
       </div>
       <div class="summary-row">
         <span>Status</span>
-        <strong data-team-status-display>Pending registration</strong>
+        <strong>{{ registration.get_payment_status_display }}</strong>
       </div>
     </div>
   </aside>

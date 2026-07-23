@@ -1,6 +1,17 @@
 from django.contrib import admin
 
-from .models import Announcement, EventConfiguration, Marks, Participant, Prize, Review, Team, Track
+from .models import (
+    Announcement,
+    EventConfiguration,
+    LeaderRegistration,
+    Marks,
+    Participant,
+    Prize,
+    ProblemStatement,
+    Review,
+    Team,
+    Track,
+)
 
 
 @admin.register(Participant)
@@ -50,3 +61,17 @@ class AnnouncementAdmin(admin.ModelAdmin):
     list_display = ('title', 'is_pinned', 'send_email', 'created_by', 'created_at')
     list_filter = ('is_pinned', 'send_email')
     search_fields = ('title', 'body')
+
+
+@admin.register(LeaderRegistration)
+class LeaderRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'email', 'college', 'department', 'payment_status', 'created_at')
+    list_filter = ('payment_status', 'college', 'graduation_year')
+    search_fields = ('first_name', 'last_name', 'email', 'reg_number', 'college')
+
+
+@admin.register(ProblemStatement)
+class ProblemStatementAdmin(admin.ModelAdmin):
+    list_display = ('title', 'track', 'code', 'slot_capacity', 'slots_filled', 'is_active')
+    list_filter = ('track', 'is_active')
+    search_fields = ('title', 'code', 'description')

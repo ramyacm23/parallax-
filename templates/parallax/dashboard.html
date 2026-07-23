@@ -169,6 +169,58 @@
         </article>
         {% endif %}
 
+        {% if participant.is_team_leader %}
+        <article class="dashboard-form">
+          <div class="dashboard-section-header">
+            <div>
+              <span class="dashboard-kicker">Slot Booking</span>
+              <h2 class="dashboard-section-title">Book a problem statement</h2>
+            </div>
+          </div>
+
+          {% if booked_problem_statement %}
+          <div class="dashboard-summary">
+            <div class="summary-row">
+              <span>Booked problem statement</span>
+              <strong>{{ booked_problem_statement.title }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Track</span>
+              <strong>{{ booked_problem_statement.track.name }}</strong>
+            </div>
+          </div>
+          <p class="dashboard-note">You can rebook another problem statement below while slots remain available.</p>
+          {% endif %}
+
+          {% if bookable_problem_statements %}
+          <form method="post" class="dashboard-form-grid" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="book_problem_statement">
+            <div class="dashboard-field full">
+              <label for="problem-statement-select">Problem statement (first-come, first-served)</label>
+              <select class="dashboard-select" id="problem-statement-select" name="problem_statement" required>
+                <option value="">Select a problem statement</option>
+                {% for ps in bookable_problem_statements %}
+                {% if ps.slot_capacity and ps.booked_total >= ps.slot_capacity and ps.id != booked_problem_statement.id %}
+                <option value="{{ ps.id }}" disabled>{{ ps.track.name }} — {{ ps.title }} (Full)</option>
+                {% else %}
+                <option value="{{ ps.id }}" {% if ps.id == booked_problem_statement.id %}selected{% endif %}>
+                  {{ ps.track.name }} — {{ ps.title }}{% if ps.slot_capacity %} ({{ ps.booked_total }}/{{ ps.slot_capacity }} booked){% else %} (Open){% endif %}
+                </option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <div class="dashboard-field full">
+              <button class="dashboard-button" type="submit">Book Slot</button>
+            </div>
+          </form>
+          {% else %}
+          <p class="dashboard-note">No problem statements are open for booking yet. The organising committee will publish them before the event.</p>
+          {% endif %}
+        </article>
+        {% endif %}
+
         <article class="dashboard-card">
           <div class="dashboard-section-header">
             <div>

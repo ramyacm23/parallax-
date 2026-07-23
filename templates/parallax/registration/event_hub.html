@@ -2,22 +2,22 @@
 
 {% block title %}Event Hub | Parallax{% endblock %}
 {% block page_name %}event-hub{% endblock %}
-{% block hero_title %}Event Hub{% endblock %}
-{% block hero_text %}This is the current in-project event hub destination used by the payment page, so the registration journey stays inside the site while the final payment confirmation hookup is still pending.{% endblock %}
+{% block hero_title %}Continue on the Event Hub{% endblock %}
+{% block hero_text %}You are being handed off to the Parallax event hub. Log in, create your team, add your friends and complete the payment there. Once payment is done, the hub will bring you back here automatically.{% endblock %}
 {% block hero_actions %}
-<a class="button" href="{% url 'registration_payment' %}">Back to Payment</a>
-<a class="button button-secondary" href="{% url 'registration_proof' %}">Upload Proof</a>
+<a class="button" href="{{ event_hub_url }}" rel="noopener noreferrer">Open Event Hub</a>
+<a class="button button-secondary" href="{% url 'registration_payment' %}">Back to Payment</a>
 {% endblock %}
 {% block hero_aside %}
 <div class="aside-header">
-  <span class="aside-label">Live Route</span>
-  <span class="status-badge status-badge--live">Internal Event Hub</span>
+  <span class="aside-label">Current Step</span>
+  <span class="status-badge status-badge--live">03 · Event Hub</span>
 </div>
 <div class="stack-sm">
-  <p class="muted-copy">Use this page as the current event hub handoff. Payment confirmation status can be layered into this page later without changing the surrounding registration steps.</p>
+  <p class="muted-copy">Team creation, member invites and payment all happen on the event hub.</p>
   <div class="info-pill">
-    <span>Saved Team Code</span>
-    <strong data-team-code-display>No team code yet</strong>
+    <span>Payment status</span>
+    <strong>{{ registration.get_payment_status_display }}</strong>
   </div>
 </div>
 {% endblock %}
@@ -26,44 +26,48 @@
 <section class="content-grid content-grid--two">
   <article class="glass-panel detail-card" data-reveal>
     <div class="panel-heading">
-      <span class="section-kicker">Current Flow</span>
-      <h2>Use this page as the event hub handoff</h2>
-      <p>It gives the payment step a stable in-project destination today and leaves one clear place to add payment status checks later.</p>
+      <span class="section-kicker">On the Event Hub</span>
+      <h2>What to do next</h2>
+      <p>The event hub is where your team is built and payment is collected.</p>
     </div>
 
     <ul class="detail-list">
-      <li>Reach this page directly from the payment step inside registration.</li>
-      <li>Return to proof upload once the external payment is completed.</li>
-      <li>Add payment confirmation here later without changing the registration forms.</li>
+      <li>Log in to the event hub with your details.</li>
+      <li>Create your team and add your friends as members.</li>
+      <li>Complete the payment on the hub.</li>
+      <li>You will be redirected back here once payment is confirmed.</li>
     </ul>
 
     <div class="action-row">
-      <a class="button" href="{% url 'registration_proof' %}">Go to Proof Upload</a>
-      <a class="button button-secondary" href="{% url 'registration_index' %}">Back to Registration Home</a>
+      <a class="button button-large" href="{{ event_hub_url }}" rel="noopener noreferrer">Open Event Hub</a>
+      {# In production the event hub redirects back with ?status=paid. This link
+         simulates that return so the placeholder flow can be completed. #}
+      <a class="button button-secondary" href="{% url 'registration_event_hub' %}?status=paid">I have completed payment</a>
+    </div>
+
+    <div class="info-banner">
+      <strong>Placeholder note</strong>
+      <span>Real event-hub payment confirmation is owned by the platform integration; this page records a confirmed status on return.</span>
     </div>
   </article>
 
   <aside class="glass-panel detail-card" data-reveal>
     <div class="panel-heading">
-      <span class="section-kicker">Saved Snapshot</span>
-      <h2>Current team details</h2>
+      <span class="section-kicker">Saved Registration</span>
+      <h2>Your details</h2>
     </div>
     <div class="summary-list">
       <div class="summary-row">
-        <span>Team Code</span>
-        <strong data-team-code-display>No team code yet</strong>
-      </div>
-      <div class="summary-row">
-        <span>Team Name</span>
-        <strong data-team-name-display>Waiting for leader registration</strong>
-      </div>
-      <div class="summary-row">
         <span>Leader Name</span>
-        <strong data-leader-name-display>Waiting for leader registration</strong>
+        <strong>{{ registration.full_name }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Email</span>
+        <strong>{{ registration.email }}</strong>
       </div>
       <div class="summary-row">
         <span>Status</span>
-        <strong data-team-status-display>Pending registration</strong>
+        <strong>{{ registration.get_payment_status_display }}</strong>
       </div>
     </div>
   </aside>
