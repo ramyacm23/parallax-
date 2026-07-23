@@ -33,8 +33,8 @@ body{background:radial-gradient(ellipse at 50% -10%, rgba(24,120,255,.28), trans
 .px-timer .timer-num{font-size:30px;font-weight:700;color:#3fb0ff;line-height:1;font-variant-numeric:tabular-nums}
 .px-timer .timer-label{font-size:9px;letter-spacing:.18em;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:5px}
 .px-timer .timer-sep{color:rgba(255,255,255,.3);font-size:18px;margin-bottom:14px}
-.sponsor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.sponsor-card{border:1px solid rgba(21,133,255,.35);border-radius:14px;padding:200px 22px;text-align:center;background:rgba(1,12,33,.55)}
+.sponsor-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.sponsor-card{border:1px solid rgba(21,133,255,.35);border-radius:14px;padding:100px 22px;text-align:center;background:rgba(1,12,33,.55)}
 .sponsor-logo-placeholder{width:64px;height:64px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;border:2px solid #1687ff;color:#7ddaff;font-size:1.4rem;background:radial-gradient(circle at 50% 30%,#174d85,#07142e 60%)}
 .sponsor-card h3{font-size:1rem;margin:0 0 8px}
 .sponsor-card p{color:#aebbd0;font-size:.85rem;line-height:1.6}

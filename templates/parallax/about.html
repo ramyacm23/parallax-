@@ -6,8 +6,8 @@
   <p class="about-copy">Parallax is the annual flagship hackathon of VIT Chennai, brought to you by the School of Electronics Engineering. We bring together curious minds, diverse skills, and bold ideas to solve real-world problems from new perspectives.</p>
   <section class="oc-panel">
     <h2 class="oc-heading">FACULTY COORDINATORS</h2><div class="faculty-grid">
-      <article class="person-card"><img src="{% static 'assets/Dr. Richards Joe Stanislaus.png' %}" alt="Parallax emblem" class="px-mark-icon"><i class="fa-regular fa-user"></i><h3>Faculty Coordinator</h3><p>Prof.Dr. Richards Joe Stanislaus<br>School of Electronics Engineering</p></article>
-      <article class="person-card"><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>Faculty Coordinator</h3><p>Assistant Professor<br>School of Electronics Engineering</p></article>
+      <article class="person-card"><img src="{% static 'assets/Dr. Richards Joe Stanislaus.png' %}"class="px-mark-icon"><i class="fa-regular fa-user"></i><h3>Faculty Coordinator</h3><p>Prof.Dr. Richards Joe Stanislaus<br>School of Electronics Engineering</p></article>
+      <article class="person-card"><img src="{% static 'assets/mam.png' %}"class="px-mark-icon"><i class="fa-regular fa-user"></i><h3>Faculty Coordinator</h3><p>School of Electronics Engineering</p></article>
     </div>
     <h2 class="oc-heading">CORE COMMITTEE</h2><div class="core-grid">
       {% for name, role in core_members %}<article class="core-box"><h3 class="person-card"></h3><div class="portrait-placeholder"><i class="fa-regular fa-user"></i></div><h3>{{ name }}</h3><p>{{ role }}</p></article>{% empty %}
