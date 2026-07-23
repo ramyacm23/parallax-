@@ -1,88 +1,140 @@
 {% extends 'parallax/registration/base.html' %}
 
-{% block title %}Payment Page | Parallax{% endblock %}
+{% block title %}Payment | Parallax{% endblock %}
 {% block page_name %}payment{% endblock %}
-{% block hero_title %}Payment Page{% endblock %}
-{% block hero_text %}Registration is complete on the front end. Use the placeholder event hub link now, then move to proof upload for organizer review readiness.{% endblock %}
-{% block hero_actions %}
-<a class="button" href="https://example.com" target="_blank" rel="noreferrer noopener">Proceed to Event Hub</a>
-<a class="button button-secondary" href="{% url 'registration_proof' %}">Upload Proof</a>
+
+{% block hero_title %}Complete Payment{% endblock %}
+
+{% block hero_text %}
+Your registration is complete. Complete the payment to finalize your participation.
+After payment, wait for organizer verification to access your dashboard.
 {% endblock %}
+
+{% block hero_actions %}
+<a class="button" href="#paymentSection">Pay Now</a>
+<a class="button button-secondary" href="{% url 'registration_index' %}">Back to Registration</a>
+{% endblock %}
+
 {% block hero_aside %}
 <div class="aside-header">
-  <span class="aside-label">Registration Completed</span>
-  <span class="status-badge status-badge--success">Ready for Payment</span>
+    <span class="aside-label">Registration Status</span>
+    <span class="status-badge">Step 2 of 4</span>
 </div>
-<div class="stack-sm">
-  <p class="muted-copy">The event hub URL is intentionally isolated to make replacement easy when the final link is available.</p>
-  <div class="info-pill">
-    <span>Current Event Hub</span>
-    <strong>https://example.com</strong>
-  </div>
-</div>
+
+<ul class="timeline-list">
+    <li class="timeline-item">
+        <span>01</span>
+        <div>
+            <strong>Team Registration</strong>
+            <p>Complete leader and team information.</p>
+        </div>
+    </li>
+
+    <li class="timeline-item is-active">
+        <span>02</span>
+        <div>
+            <strong>Payment</strong>
+            <p>Complete the registration fee.</p>
+        </div>
+    </li>
+
+    <li class="timeline-item">
+        <span>03</span>
+        <div>
+            <strong>Verification</strong>
+            <p>Organizer approval required.</p>
+        </div>
+    </li>
+
+    <li class="timeline-item">
+        <span>04</span>
+        <div>
+            <strong>Dashboard</strong>
+            <p>Edit your details after approval.</p>
+        </div>
+    </li>
+</ul>
 {% endblock %}
 
 {% block registration_content %}
+
 <section class="content-grid content-grid--two">
-  <article class="glass-panel detail-card" data-reveal>
-    <div class="panel-heading">
-      <span class="section-kicker">Next Action</span>
-      <h2>Complete payment before uploading proof</h2>
-      <p>Use the large CTA below to access the placeholder event hub. Another teammate can replace the link later without touching the rest of the page layout.</p>
-    </div>
 
-    <div class="action-row">
-      <a class="button button-large" href="https://example.com" target="_blank" rel="noreferrer noopener">Proceed to Event Hub</a>
-      <a class="button button-secondary" href="{% url 'registration_proof' %}">Go to Proof Upload</a>
-    </div>
+<div class="glass-panel detail-card" id="paymentSection">
 
-    <div class="info-banner">
-      <strong>Reminder:</strong>
-      <span>Complete payment before uploading proof for organizer approval.</span>
-    </div>
-  </article>
+<div class="panel-heading">
+<span class="section-kicker">Payment</span>
+<h2>Registration Fee</h2>
+<p>Complete your payment to confirm your spot in Parallax 2026.</p>
+</div>
 
-  <aside class="glass-panel detail-card" data-reveal>
-    <div class="panel-heading">
-      <span class="section-kicker">Saved Registration</span>
-      <h2>Local registration snapshot</h2>
-    </div>
-    <div class="summary-list">
-      <div class="summary-row">
-        <span>Team Code</span>
-        <strong data-team-code-display>No team code yet</strong>
-      </div>
-      <div class="summary-row">
-        <span>Team Name</span>
-        <strong data-team-name-display>Waiting for leader registration</strong>
-      </div>
-      <div class="summary-row">
-        <span>Leader Name</span>
-        <strong data-leader-name-display>Waiting for leader registration</strong>
-      </div>
-      <div class="summary-row">
-        <span>Status</span>
-        <strong data-team-status-display>Pending registration</strong>
-      </div>
-    </div>
-  </aside>
+<div class="stack-lg">
+
+<div class="info-pill">
+<span>Amount Due</span>
+<strong>₹999</strong>
+</div>
+
+<div>
+<h3>Payment Instructions</h3>
+<ul class="inline-list">
+<li>Click "Pay Now" to initiate payment</li>
+<li>Complete transaction securely</li>
+<li>Receive payment confirmation</li>
+<li>Wait for organizer verification</li>
+</ul>
+</div>
+
+<div class="action-row">
+<a class="button button-large" href="#" onclick="alert('Payment gateway placeholder - integrate Razorpay/PayU here')">Pay Now</a>
+</div>
+
+</div>
+
+</div>
+
+<aside class="glass-panel detail-card">
+
+<div class="panel-heading">
+<span class="section-kicker">What's Next</span>
+<h2>After Payment</h2>
+</div>
+
+<div class="stack-sm">
+<p class="muted-copy">Once you complete payment, your registration enters the verification stage.</p>
+
+<div class="info-banner">
+<strong>Waiting for Verification</strong>
+<span>Our team will verify your payment within 24 hours and grant dashboard access.</span>
+</div>
+
+<p class="field-help">You'll receive an email confirmation once your registration is approved.</p>
+</div>
+
+</aside>
+
 </section>
 
-<section class="stack-grid" data-reveal>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step A</span>
-    <h3>Visit the event hub</h3>
-    <p>Use the placeholder link for now. It is the only external URL on this page and can be swapped later in seconds.</p>
-  </article>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step B</span>
-    <h3>Upload your proof</h3>
-    <p>Move to the upload page after payment so the organizer-facing workflow can continue with a clear approval signal.</p>
-  </article>
-  <article class="mini-card glass-panel">
-    <span class="section-kicker">Step C</span>
-    <h3>Leave feedback</h3>
-    <p>Once the flow is complete, the review page captures event experience details and stores them locally for the demo.</p>
-  </article>
+<section class="stack-grid">
+
+<article class="mini-card glass-panel">
+<span class="section-kicker">Secure</span>
+<h3>Safe Payment</h3>
+<p>All transactions are encrypted and processed securely through trusted payment gateways.</p>
+</article>
+
+<article class="mini-card glass-panel">
+<span class="section-kicker">Confirmation</span>
+<h3>Email Receipt</h3>
+<p>You'll receive an instant payment confirmation email with your transaction details.</p>
+</article>
+
+<article class="mini-card glass-panel">
+<span class="section-kicker">Access</span>
+<h3>Dashboard Ready</h3>
+<p>Once approved, log in to your dashboard to manage your team and event details.</p>
+</article>
+
 </section>
+
 {% endblock %}
