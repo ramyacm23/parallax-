@@ -43,7 +43,7 @@
     <div class="panel-heading">
       <span class="section-kicker">Leader Form</span>
       <h2>Register Team Leader</h2>
-      <p>These are the currently confirmed registration categories. More fields will be added when the core team finalises them.</p>
+      <p>Enter the team leader details and your team information to register. You will choose a payment option on the next step.</p>
     </div>
 
     <form id="leaderServerForm" class="stack-lg" method="post" action="{% url 'registration_leader' %}" novalidate>
@@ -65,6 +65,11 @@
         </div>
 
         <div class="field">
+          <label for="leader-phone">Phone Number</label>
+          <input class="input" id="leader-phone" name="phone_number" type="tel" placeholder="9876543210" value="{{ form_values.phone_number|default:'' }}" required>
+        </div>
+
+        <div class="field">
           <label for="leader-college">College</label>
           <input class="input" id="leader-college" name="college" type="text" placeholder="VIT Chennai" value="{{ form_values.college|default:'' }}" required>
         </div>
@@ -80,17 +85,27 @@
         </div>
 
         <div class="field">
-          <label for="graduation-year">Graduating Year</label>
+          <label for="graduation-year">Year</label>
           <input class="input" id="graduation-year" name="graduation_year" type="number" min="2024" max="2035" placeholder="2027" value="{{ form_values.graduation_year|default:'' }}" required>
-        </div>
-
-        <div class="field">
-          <label for="city">City</label>
-          <input class="input" id="city" name="city" type="text" placeholder="Chennai" value="{{ form_values.city|default:'' }}" required>
         </div>
       </div>
 
-      <p class="field-help">6 further registration categories are pending from the core team and will be added here.</p>
+      <div class="panel-heading">
+        <span class="section-kicker">Team Details</span>
+        <h2>Your Team</h2>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="team-name">Team Name</label>
+          <input class="input" id="team-name" name="team_name" type="text" placeholder="Team Parallax" value="{{ form_values.team_name|default:'' }}" required>
+        </div>
+
+        <div class="field field--full">
+          <label for="team-members">Team Members</label>
+          <textarea class="input" id="team-members" name="team_members" rows="4" placeholder="List each member's name, one per line" required>{{ form_values.team_members|default:'' }}</textarea>
+        </div>
+      </div>
 
       <button class="button button-large" type="submit">Save &amp; Continue to Payment</button>
     </form>

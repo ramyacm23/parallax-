@@ -65,9 +65,9 @@ class AnnouncementAdmin(admin.ModelAdmin):
 
 @admin.register(LeaderRegistration)
 class LeaderRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'email', 'college', 'department', 'payment_status', 'created_at')
+    list_display = ('full_name', 'email', 'phone_number', 'team_name', 'college', 'department', 'payment_status', 'created_at')
     list_filter = ('payment_status', 'college', 'graduation_year')
-    search_fields = ('first_name', 'last_name', 'email', 'reg_number', 'college')
+    search_fields = ('first_name', 'last_name', 'email', 'phone_number', 'team_name', 'reg_number', 'college')
 
 
 @admin.register(ProblemStatement)

@@ -36,11 +36,13 @@ REGISTRATION_FIELD_LABELS = {
     'first_name': 'first name',
     'last_name': 'last name',
     'email': 'email ID',
+    'phone_number': 'phone number',
     'college': 'college',
     'department': 'department',
     'reg_number': 'registration number',
-    'graduation_year': 'graduation year',
-    'city': 'city',
+    'graduation_year': 'year',
+    'team_name': 'team name',
+    'team_members': 'team members',
 }
 
 DEFAULT_TRACKS = [
@@ -181,11 +183,13 @@ def registration_leader(request):
                 'user': request.user if request.user.is_authenticated else None,
                 'first_name': form_values['first_name'],
                 'last_name': form_values['last_name'],
+                'phone_number': form_values['phone_number'],
                 'college': form_values['college'],
                 'department': form_values['department'],
                 'reg_number': form_values['reg_number'],
                 'graduation_year': graduation_year,
-                'city': form_values['city'],
+                'team_name': form_values['team_name'],
+                'team_members': form_values['team_members'],
             },
         )
 

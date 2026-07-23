@@ -240,12 +240,15 @@ class LeaderRegistration(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=20)
     college = models.CharField(max_length=200)
     department = models.CharField(max_length=150)
     reg_number = models.CharField('Registration number', max_length=50)
     graduation_year = models.PositiveIntegerField()
-    city = models.CharField(max_length=120)
-    # NOTE: 6 further form categories are pending from the core team; add them here.
+    team_name = models.CharField(max_length=150)
+    team_members = models.TextField(
+        help_text='Names of the team members, one per line or comma-separated.',
+    )
     payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_PENDING)
     registration_email_sent = models.BooleanField(default=False)
     payment_email_sent = models.BooleanField(default=False)
