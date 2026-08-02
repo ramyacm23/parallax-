@@ -377,6 +377,14 @@
   }
   .modal-ps-checkbox.checked{background:var(--accent-gradient); border-color:var(--accent); color:#04121C;}
   .modal-ps-item.expanded .modal-ps-checkbox{margin-top:2px;}
+  .modal-ps-check-col{display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0;}
+  .modal-ps-slots{
+    min-width:44px; box-sizing:border-box; padding:2px 4px; border-radius:5px;
+    border:1.5px solid var(--border); background:rgba(255,255,255,0.03);
+    font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--text-secondary);
+    text-align:center; line-height:1.5; pointer-events:none; user-select:none;
+  }
+  .modal-ps-slots.full{background:rgba(239,68,68,0.16); border-color:#ef4444; color:#ef4444;}
   .modal-ps-code{font-family:var(--font-mono); font-size:11px; color:var(--accent); font-weight:700; flex-shrink:0; margin-top:2px;}
   .modal-ps-text{flex:1; min-width:0;}
   .modal-ps-title{font-size:13.5px; font-weight:700; color:var(--text-primary); margin-bottom:4px;}
@@ -624,6 +632,10 @@
 </div>
 
 <!-- Hidden forms: submit to the real participant_dashboard POST handler. -->
+<form id="teamNameForm" data-action="{{ urls.set_team_name }}" class="hidden">
+  {% csrf_token %}
+  <input type="hidden" id="teamNameHidden" name="team_name" value="">
+</form>
 <form id="trackForm" data-action="{{ urls.select_track }}" class="hidden">
   {% csrf_token %}
   <input type="hidden" id="trackSelectHidden" name="track" value="">
@@ -632,6 +644,24 @@
   {% csrf_token %}
   <input type="hidden" id="psSelectHidden" name="problem_statement" value="">
 </form>
+
+<!-- ================= TEAM NAME MODAL — blocking, shown once per team until a
+     name is saved. Cannot be dismissed/clicked away from while needed. ================= -->
+<div class="modal-overlay" id="teamNameModalOverlay">
+  <div class="modal-box" id="teamNameModalBox">
+    <div class="modal-eyebrow">Welcome</div>
+    <div class="modal-title">Name your team</div>
+    <p class="modal-sub">We couldn't find a team name on your account yet. Enter one to continue to your dashboard.</p>
+    <input type="text" id="teamNameVisibleInput" placeholder="Enter your team name" maxlength="80"
+      style="width:100%; box-sizing:border-box; margin-top:14px; padding:11px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-primary); font-size:13.5px;">
+    <div id="teamNameError" style="color:#ef4444; font-size:12.5px; margin-top:8px; display:none;"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn btn-primary" type="button" id="teamNameSaveBtn" style="width:100%;">Save &amp; Continue</button>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- ================= DOMAIN & PROBLEM STATEMENT MODAL (always a big popup) ================= -->
 <div class="modal-overlay" id="domainModalOverlay">
@@ -655,6 +685,8 @@
 {{ track|json_script:"data-track" }}
 {{ marks|json_script:"data-marks" }}
 {{ announcements|json_script:"data-announcements" }}
+{{ timeline|json_script:"data-timeline" }}
+{{ needs_team_name|json_script:"data-needs-team-name" }}
 
 <script>
 (function(){
@@ -670,6 +702,8 @@
   var TRACK_CTX = JSON.parse(document.getElementById('data-track').textContent);
   var MARKS = JSON.parse(document.getElementById('data-marks').textContent);
   var ANNOUNCEMENTS_RAW = JSON.parse(document.getElementById('data-announcements').textContent);
+  var TIMELINE = JSON.parse(document.getElementById('data-timeline').textContent);
+  var NEEDS_TEAM_NAME = JSON.parse(document.getElementById('data-needs-team-name').textContent);
 
   var TEAM = {
     trackId: TEAM_CTX.track_id,
@@ -718,6 +752,44 @@
 
   var psForm = document.getElementById('psForm');
   bindFormSubmit(psForm, function(){ window.location.reload(); });
+
+  /* =================================================================
+     TEAM NAME MODAL — blocks the dashboard the first time a team's
+     account has no team_name saved yet (checked server-side via
+     NEEDS_TEAM_NAME, which mirrors views.participant_dashboard's
+     `needs_team_name` context flag). Not dismissible until saved.
+     ================================================================= */
+  var teamNameForm = document.getElementById('teamNameForm');
+  bindFormSubmit(teamNameForm, function(){ window.location.reload(); });
+
+  function showTeamNameModal(){
+    document.getElementById('teamNameModalOverlay').classList.add('visible');
+    var input = document.getElementById('teamNameVisibleInput');
+    setTimeout(function(){ input.focus(); }, 50);
+  }
+
+  if(NEEDS_TEAM_NAME){
+    showTeamNameModal();
+    var saveBtn = document.getElementById('teamNameSaveBtn');
+    var errorEl = document.getElementById('teamNameError');
+    var visibleInput = document.getElementById('teamNameVisibleInput');
+    function submitTeamName(){
+      var value = visibleInput.value.trim();
+      if(!value){
+        errorEl.textContent = 'Please enter a team name.';
+        errorEl.style.display = 'block';
+        return;
+      }
+      errorEl.style.display = 'none';
+      document.getElementById('teamNameHidden').value = value;
+      if(teamNameForm.requestSubmit) teamNameForm.requestSubmit();
+      else teamNameForm.dispatchEvent(new Event('submit', {cancelable:true}));
+    }
+    saveBtn.addEventListener('click', submitTeamName);
+    visibleInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter') submitTeamName();
+    });
+  }
 
   function escapeHtml(str){
     var div = document.createElement('div');
@@ -894,9 +966,14 @@
               PROBLEM_STATEMENTS.map(function(ps, i){
                 var isOpen = expandedPSIndex === i;
                 var isChecked = chosenPSIndex === i;
+                var slotsFull = !!ps.is_full;
+                var slotsLabel = slotsFull ? 'FULL' : (ps.slots_available + '/' + ps.slot_capacity);
                 return '<div class="modal-ps-item ' + (isOpen ? 'expanded' : '') + '" data-index="' + i + '">' +
                   '<button class="modal-ps-item-head" type="button" data-toggle="' + i + '">' +
-                    '<span class="modal-ps-checkbox' + (isChecked ? ' checked' : '') + '" data-check="' + i + '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
+                    '<span class="modal-ps-check-col">' +
+                      '<span class="modal-ps-checkbox' + (isChecked ? ' checked' : '') + '" data-check="' + i + '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
+                      '<span class="modal-ps-slots' + (slotsFull ? ' full' : '') + '" title="Slots available / capacity" aria-readonly="true">' + escapeHtml(slotsLabel) + '</span>' +
+                    '</span>' +
                     (ps.code ? '<span class="modal-ps-code">' + escapeHtml(ps.code) + '</span>' : '') +
                     '<span class="modal-ps-text">' +
                       '<span class="modal-ps-title">' + escapeHtml(ps.title) + '</span>' +
@@ -1056,37 +1133,34 @@
      the "current stage" is inferred from team.track_id / registration
      status / number of marks rows already present in the page context.
      ================================================================= */
-  var PROGRESS_STAGES = [
-    'Online Registration & Payment',
-    'Domain & Problem Statement',
-    'Offline Registration at Venue',
-    'Hackathon Inauguration',
-    'Round 1 (Student Review)',
-    'Round 2 (Faculty Review)',
-    'Final Review (Industry Review)',
-    'Closing Ceremony & Prize Distribution'
-  ];
+  /* Stage labels and per-stage status ("done"/"active"/"upcoming") now come
+     straight from the backend (views.build_participant_timeline), instead
+     of being recomputed here from TEAM/MARKS. This keeps the strip in sync
+     with the same logic the server uses everywhere else. */
+  var PROGRESS_STAGES = TIMELINE.map(function(stage){ return stage.stage; });
 
   function computeCurrentStageIndex(){
-    var idx = 1; // team exists -> registration & payment considered done, Domain & PS next
-    if(TEAM.trackId) idx = Math.max(idx, 2); // domain & PS chosen -> offline registration next
-    if(TEAM.registrationStatus === 'approved') idx = Math.max(idx, 4); // offline registration & inauguration done -> Round 1 next
-    idx += MARKS.length; // each recorded round pushes progress forward
-    return Math.min(idx, PROGRESS_STAGES.length);
+    var activeIndex = TIMELINE.findIndex(function(stage){ return stage.status === 'active'; });
+    if(activeIndex !== -1) return activeIndex;
+    // No explicit "active" entry (e.g. every stage already done) -> treat
+    // the strip as fully complete.
+    var doneCount = TIMELINE.filter(function(stage){ return stage.status === 'done'; }).length;
+    return Math.min(doneCount, PROGRESS_STAGES.length);
   }
 
   function renderSteps(){
     var currentIndex = computeCurrentStageIndex();
     var track = document.getElementById('stepsList');
-    var nodesHtml = PROGRESS_STAGES.map(function(title, i){
-      var done = i < currentIndex;
-      var active = i === currentIndex;
+    var nodesHtml = TIMELINE.map(function(stage, i){
+      var done = stage.status === 'done';
+      var active = stage.status === 'active';
       var zigzag = (i % 2 === 0) ? 'up' : 'down';
       var status = done ? 'Completed' : (active ? 'In progress' : 'Upcoming');
+      var tip = status + (stage.date ? ' \u2014 ' + escapeHtml(stage.date) : '');
       return '<div class="step-node ' + zigzag + ' ' + (done ? 'done' : '') + ' ' + (active ? 'active' : '') + '" data-status="' + status + '">' +
         '<div class="dot">' + (done ? '\u2713' : (i + 1)) + '</div>' +
-        '<div class="step-label">' + escapeHtml(title) + '</div>' +
-        '<div class="step-tip">' + status + '</div>' +
+        '<div class="step-label">' + escapeHtml(stage.stage) + '</div>' +
+        '<div class="step-tip">' + tip + '</div>' +
       '</div>';
     }).join('');
     track.innerHTML = '<svg class="progress-line" id="progressLineSvg"></svg>' + nodesHtml;

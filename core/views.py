@@ -170,6 +170,16 @@ def participant_dashboard(request):
     team = participant.team
     track_id = None
     if request.method == "POST":
+        team_name = request.POST.get("team_name")
+        if team_name is not None:
+            team_name = team_name.strip()
+            if not team_name:
+                messages.error(request, "Team name cannot be empty.")
+            else:
+                team.team_name = team_name
+                team.save(update_fields=["team_name"])
+                messages.success(request, "Team name saved successfully.")
+            return redirect("participant_dashboard")
         track_id = request.POST.get("track")
         problem_statement_id = request.POST.get("problem_statement")
         if problem_statement_id:
@@ -201,6 +211,7 @@ def participant_dashboard(request):
         team.save(update_fields=["track"])
         messages.success(request, "Track selected successfully.")
         return redirect("participant_dashboard")
+    needs_team_name = not bool((team.team_name or "").strip())
     tracks = Track.objects.filter(is_published=True)
     problem_statements = ProblemStatement.objects.filter(is_published=True)
     announcements = Announcement.objects.all().order_by("-created_at")
@@ -211,7 +222,9 @@ def participant_dashboard(request):
             return []
         return [line.strip() for line in raw_text.splitlines() if line.strip()]
 
+    timeline = build_participant_timeline(team)
     context = {
+    "needs_team_name": needs_team_name,
     "team": {
         "name": team.team_name,
         "id": team.team_code,
@@ -246,6 +259,10 @@ def participant_dashboard(request):
                 "expected_impact": ps.impact,
                 "minimum_requirements": split_lines(ps.min_requirements),
                 "dependencies": split_lines(ps.dependencies),
+                "slot_capacity": ps.slot_capacity,
+                "slots_available": ps.slots_available,
+                "is_full": ps.is_full,
+                "slots_label": f"[{ps.slots_available}/{ps.slot_capacity}]",
             }
             for ps in ProblemStatement.objects.filter(
                 track=team.track,
@@ -290,23 +307,7 @@ def participant_dashboard(request):
         "certificates_url": None,
         "certificates_enabled": False,
     },
-    "timeline": [
-        {
-            "stage": "Registration",
-            "status": "done",
-            "date": team.created_at.strftime("%d %b %Y"),
-        },
-        {
-            "stage": "Track Selection",
-            "status": "active" if team.track else "upcoming",
-            "date": None,
-        },
-        {
-            "stage": "Hackathon",
-            "status": "upcoming",
-            "date": None,
-        },
-    ],
+    "timeline": timeline,
     "urls": {
         "home": reverse("home"),
         "set_team_name": reverse("participant_dashboard"),
@@ -777,69 +778,82 @@ def parse_problem_statement_text(raw_text):
     if cleaned_items:
         return cleaned_items
     return ['Problem statements for this set have not been added yet.']
-def build_participant_progress(team, participant, problem_statement_sets, review_score_count):
-    progress_items = [
-        {
-            'state': 'Complete',
-            'tone': 'success',
-            'description': 'Your participant profile is complete and linked to the team space.',
-        },
-        {
-            'label': 'Team Access',
-            'state': team.team_code,
-            'tone': 'info',
-            'description': f'You are currently part of {team.team_name}.',
-        },
-        {
-            'label': 'Track Selection',
-            'state': team.track.name if team.track else 'Pending',
-            'tone': 'success' if team.track else 'pending',
-            'description': 'The selected track will be reflected automatically in your dashboard.',
-        },
-        {
-            'label': 'Review Status',
-            'state': team.get_status_display(),
-            'tone': 'success' if team.status == 'APPROVED' else 'danger' if team.status == 'REJECTED' else 'pending',
-            'description': 'This is the current organizer review status of your team registration.',
-        },
-        {
-            'label': 'Problem Statements',
-            'state': f'{len(problem_statement_sets)} Set(s) Live' if problem_statement_sets else 'Awaiting Release',
-            'tone': 'success' if problem_statement_sets else 'pending',
-            'description': 'Released statements for your selected track appear here automatically.',
-        },
-        {
-            'label': 'Evaluation',
-            'state': f'{review_score_count} Review(s) Scored' if review_score_count else 'No Scores Yet',
-            'tone': 'info' if review_score_count else 'pending',
-            'description': 'Review marks are shown here only for your own team progress tracking.',
-        },
+def build_participant_timeline(team):
+    """Eight-step participant journey for the dashboard "Your Progress" strip.
+
+    Stage labels and the current-stage logic mirror what the frontend
+    previously hardcoded, so the UI can render straight from this data.
+    """
+    stages = [
+        "Online Registration & Payment",
+        "Domain & Problem Statement",
+        "Offline Registration at Venue",
+        "Hackathon Inauguration",
+        "Round 1 (Student Review)",
+        "Round 2 (Faculty Review)",
+        "Final Review (Industry Review)",
+        "Closing Ceremony & Prize Distribution",
     ]
-    if participant.is_team_leader:
-        progress_items.append(
+
+    marks_count = Marks.objects.filter(team=team).count()
+
+    # Registration & payment is done once the team exists -> Domain & PS is next.
+    current_index = 1
+    if team.track_id:
+        current_index = max(current_index, 2)
+    if team.status == "APPROVED":
+        current_index = max(current_index, 4)
+    current_index += marks_count
+    current_index = min(current_index, len(stages))
+
+    timeline = []
+    for index, stage in enumerate(stages):
+        if index < current_index:
+            status = "done"
+        elif index == current_index:
+            status = "active"
+        else:
+            status = "upcoming"
+        timeline.append(
             {
-                'label': 'Leader Controls',
-                'state': 'Enabled',
-                'tone': 'info',
-               'description': 'You can manage your teams details and selections from your dashboard.',
+                "stage": stage,
+                "status": status,
+                "date": team.created_at.strftime("%d %b %Y") if index == 0 else None,
             }
         )
-    return progress_items
+    return timeline
 def access_denied(request):
     return render(request, "parallax/access_denied.html")
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+
 def bootstrap_admin(request):
     User = get_user_model()
-    username = "admin"
-    if not User.objects.filter(username=username).exists():
-        User.objects.create_superuser(
-            username="mkirt",
-            email="kirthiksudharsan.m2025@vitstudent.ac.in",
-            password="mkirt"
-        )
-        return HttpResponse("Superuser created successfully.")
-    return HttpResponse("Superuser already exists.")
+
+    user, created = User.objects.get_or_create(
+        username="mkirt",
+        defaults={
+            "email": "kirthiksudharsan.m2025@vitstudent.ac.in"
+        }
+    )
+
+    user.is_staff = True
+    user.is_superuser = True
+    user.is_active = True
+    user.set_password("mkirt")
+    user.save()
+
+    return HttpResponse(
+        f"""
+        Username: {user.username}<br>
+        Staff: {user.is_staff}<br>
+        Superuser: {user.is_superuser}<br>
+        Active: {user.is_active}<br>
+        Password reset successfully.
+        """
+    )
 from django.shortcuts import get_object_or_404, redirect
 def delete_announcement(request, announcement_id):
     if request.method == "POST":
